@@ -1,13 +1,44 @@
 .dashboard-container {
   header {
+    margin-bottom: 2rem;
+
     h1 {
-      font-size: 5rem;
+      font-size: 4.5rem;
       margin: 1.25rem 0;
+      span{
+        font-size: 2rem;
+        color: #BDBEBF;
+        font-weight: 600;
+        vertical-align: super;
+      }
     }
     p {
       margin: 0;
       color: #67BF6B;
       font-size: 1.25rem;
     }
+  }
+
+  .tabs {
+    .ant-tabs .ant-tabs-nav-list{
+      
+      .ant-tabs-ink-bar.ant-tabs-ink-bar-animated{
+        background-color: #4B40EE;
+      }
+
+      .ant-tabs-tab{
+      font-size: 1.125rem;
+      font-weight: 400;
+
+      &:hover{
+        color: #4B40EE99;
+      }
+      &.ant-tabs-tab-active .ant-tabs-tab-btn{
+        color: #4B40EE;
+        
+      }
+  }
+    }
+      
   }
 }
