@@ -28,11 +28,9 @@ function StockService() {
         headers,
       })
       .then((res) => {
-        console.log(res);
         setStockData(res?.data?.results);
       })
       .catch((e) => {
-        console.log(e);
         Notification({
           message: e?.response?.data?.error,
           type: 'error',

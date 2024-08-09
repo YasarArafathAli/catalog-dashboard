@@ -5,6 +5,9 @@ import {
   CartesianGrid,
   Tooltip,
   Area,
+  XAxis,
+  YAxis,
+  ReferenceLine,
   ResponsiveContainer,
 } from 'recharts';
 import StockService from '../../service/Stock';
@@ -15,46 +18,13 @@ import {
   ShrinkOutlined,
   PlusCircleOutlined,
 } from '@ant-design/icons';
-
-// import CustomTooltip from './CustomTooltip';
-const data = [
-  { name: 'Day 1', n: 12000 },
-  { name: 'Day 2', n: 33000 },
-  { name: 'Day 3', n: 34500 },
-  { name: 'Day 4', n: 34200 },
-  { name: 'Day 5', n: 43500 },
-  { name: 'Day 6', n: 34000 },
-  { name: 'Day 7', n: 33179.71 },
-  { name: 'Day 8', n: 33179.71 },
-  { name: 'Day 9', n: 33179.71 },
-  { name: 'Day 10', n: 43179.71 },
-  { name: 'Day 11', n: 42000 },
-  { name: 'Day 12', n: 43000 },
-  { name: 'Day 13', n: 44500 },
-  { name: 'Day 14', n: 44200 },
-  { name: 'Day 15', n: 43500 },
-  { name: 'Day 16', n: 44000 },
-  { name: 'Day 17', n: 43179.71 },
-  { name: 'Day 18', n: 53179.71 },
-  { name: 'Day 19', n: 53179.71 },
-  { name: 'Day 20', n: 53179.71 },
-  { name: 'Day 21', n: 52000 },
-  { name: 'Day 22', n: 73000 },
-  { name: 'Day 23', n: 64500 },
-  { name: 'Day 24', n: 56200 },
-  { name: 'Day 25', n: 59500 },
-  { name: 'Day 26', n: 64000 },
-  { name: 'Day 27', n: 63179.71 },
-  { name: 'Day 28', n: 63179.71 },
-  { name: 'Day 29', n: 63179.71 },
-  { name: 'Day 20', n: 63179.71 },
-];
+import CustomTooltip from '../Tooltip/CustomTooltip';
 
 const LineGraph = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [days, setDays] = useState(30);
   const { stockData, fetchStockData } = StockService();
-
+  // const [hoveredValue, setHoveredValue] = useState();
   useEffect(() => {
     fetchStockData(days);
   }, [days]);
@@ -65,13 +35,48 @@ const LineGraph = () => {
   const handleTimeClick = (days) => () => {
     setDays(days);
   };
+
+  // todo: set Graph placeholder in a fixed axis position
+  // const handleMouseMove = (state) => {
+  //   if (state.isTooltipActive) {
+  //     const { chartX, chartY } = state;
+  //     const lastEntry = stockData[stockData.length - 1];
+  //     setHoveredValue(state.activePayload[0].payload.value);
+  //     const xPosition = chartX;
+  //     const yPosition = chartY;
+  //   } else {
+  //     setHoveredValue(null);
+  //   }
+  // };
+
+  //   if (state.isTooltipActive) {
+  //     const { activeTooltipIndex, chartX, chartY } = state;
+  //     const lastEntry = stockData[stockData.length - 1];
+  //     const xPosition = chartX;
+  //     const yPosition = chartY;
+  //     setHoveredValue(state.activePayload[0].payload.value);
+
+  //     console.log(chartX, chartY);
+  //     setTooltipData({
+  //       active: true,
+  //       payload: [{ value: lastEntry.uv }],
+  //       label: lastEntry.name,
+  //       x: xPosition,
+  //       y: yPosition,
+  //     });
+  //   } else {
+  //     setHoveredValue(null);
+  //   }
+  // };
   return (
-    <div className="" style={{ textAlign: 'center' }}>
+    <div className="line-graph" style={{ textAlign: 'center' }}>
       <div
         className={`graph-container ${
           isFullscreen ? 'graph-container--fullscreen' : ''
         }`}
       >
+        <span className="current-value">{stockData?.at(-1)['n']}</span>
+
         <div className="toolbar">
           <div className="toolbar--left">
             <Button type="link" onClick={toggleFullscreen}>
@@ -143,10 +148,26 @@ const LineGraph = () => {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={stockData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              margin={{ top: 30, right: 0, left: 0, bottom: 0 }}
+              // onMouseMove={handleMouseMove}
+              // onMouseLeave={() => setTooltipData({ ...tooltipData })}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <Tooltip />
+              <CartesianGrid horizontal vertical stroke="#ccc" />
+              <Tooltip
+                className="tooltip--content"
+                content={<CustomTooltip />}
+                cursor={{ strokeDasharray: '3 3' }}
+                // coordinate={{ x: 21, y: 50 }}
+                allowEscapeViewBox={{ x: true, y: true }}
+              />
+
+              {/* <Tooltip  
+                content={<CustomTooltip {...tooltipData} />}
+                position={{ x: 100, y: 100 }}
+                allowEscapeViewBox={{ x: true, y: true }}
+              /> */}
+              <XAxis dataKey="t" tick={false} axisLine={false} />
+              {/* <YAxis /> */}
               <Area
                 type="linearClosed"
                 dataKey="n"

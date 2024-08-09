@@ -9,11 +9,11 @@ const onChange = (key) => {
 };
 
 const items = [
-  // {
-  //   key: '1',
-  //   label: 'Summary',
-  //   children: 'Content of Tab Pane 1',
-  // },
+  {
+    key: '1',
+    label: 'Summary',
+    children: <SkeletonPlaceHolder />,
+  },
   {
     key: '2',
     label: 'Chart',
