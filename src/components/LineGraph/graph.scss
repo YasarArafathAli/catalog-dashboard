@@ -1,0 +1,36 @@
+.graph-container{
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background-color: transparent;
+    padding: 2rem 0;
+    z-index: auto;
+  
+    &--fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #fff;
+      z-index: 1000;
+      padding: 2rem;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      // margin: 1rem;
+
+      &--left button, &--right button {
+        margin-right: 1rem;
+      }
+    }
+
+    // .graph{
+    //   border: 1px solid black;
+    //   height: 100%;
+    //   width: 100%;
+    // }
+}
+  

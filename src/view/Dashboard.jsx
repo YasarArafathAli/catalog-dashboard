@@ -2,7 +2,8 @@ import React from 'react';
 import './dashboard.scss';
 
 import { Tabs } from 'antd';
-import LineGraph from '../components/LineGraph';
+import LineGraph from '../components/LineGraph/LineGraph';
+import SkeletonPlaceHolder from '../components/Skeleton';
 const onChange = (key) => {
   console.log(key);
 };
@@ -18,7 +19,6 @@ const items = [
     label: 'Chart',
     children: (
       <>
-        {' '}
         <LineGraph />
       </>
     ),
@@ -26,17 +26,17 @@ const items = [
   {
     key: '3',
     label: 'Statistics',
-    children: 'Content of Tab Pane 3',
+    children: <SkeletonPlaceHolder />,
   },
   {
     key: '4',
     label: 'Analytics',
-    children: 'Content of Tab Pane 4',
+    children: <SkeletonPlaceHolder />,
   },
   {
     key: '5',
     label: 'Settings',
-    children: 'Content of Tab Pane 5',
+    children: <SkeletonPlaceHolder />,
   },
 ];
 
