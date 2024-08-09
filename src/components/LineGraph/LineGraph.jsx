@@ -10,6 +10,11 @@ import {
 import StockService from '../../service/Stock';
 import { Spin, Button } from 'antd';
 import './graph.scss';
+import {
+  ExpandAltOutlined,
+  ShrinkOutlined,
+  PlusCircleOutlined,
+} from '@ant-design/icons';
 
 // import CustomTooltip from './CustomTooltip';
 const data = [
@@ -60,7 +65,7 @@ const LineGraph = () => {
   const handleTimeClick = (days) => () => {
     setDays(days);
   };
-  return  (
+  return (
     <div className="" style={{ textAlign: 'center' }}>
       <div
         className={`graph-container ${
@@ -69,46 +74,95 @@ const LineGraph = () => {
       >
         <div className="toolbar">
           <div className="toolbar--left">
-            <Button onClick={toggleFullscreen}>
-              {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+            <Button type="link" onClick={toggleFullscreen}>
+              {isFullscreen ? (
+                <>
+                  <ShrinkOutlined />
+                  Exit Fullscreen
+                </>
+              ) : (
+                <>
+                  <ExpandAltOutlined />
+                  Fullscreen
+                </>
+              )}
             </Button>
-            <Button>Compare</Button>
+            <Button type="link">
+              <PlusCircleOutlined />
+              Compare
+            </Button>
           </div>
           <div className="toolbar--right">
-            <Button onClick={handleTimeClick(1)}>1d</Button>
-            <Button onClick={handleTimeClick(3)}>3d</Button>
-            <Button onClick={handleTimeClick(7)}>1W</Button>
-            <Button onClick={handleTimeClick(30)}>1M</Button>
-            <Button onClick={handleTimeClick(182)}>6M</Button>
-            <Button onClick={handleTimeClick(365)}>1Y</Button>
-            <Button onClick={handleTimeClick(1000)}>Max</Button>
+            <Button
+              type={days === 1 ? 'primary' : 'link'}
+              onClick={handleTimeClick(1)}
+            >
+              1d
+            </Button>
+            <Button
+              type={days === 3 ? 'primary' : 'link'}
+              onClick={handleTimeClick(3)}
+            >
+              3d
+            </Button>
+            <Button
+              type={days === 7 ? 'primary' : 'link'}
+              onClick={handleTimeClick(7)}
+            >
+              1W
+            </Button>
+            <Button
+              type={days === 30 ? 'primary' : 'link'}
+              onClick={handleTimeClick(30)}
+            >
+              1M
+            </Button>
+            <Button
+              type={days === 182 ? 'primary' : 'link'}
+              onClick={handleTimeClick(182)}
+            >
+              6M
+            </Button>
+            <Button
+              type={days === 365 ? 'primary' : 'link'}
+              onClick={handleTimeClick(365)}
+            >
+              1Y
+            </Button>
+            <Button
+              type={days === 1000 ? 'primary' : 'link'}
+              onClick={handleTimeClick(1000)}
+            >
+              Max
+            </Button>
           </div>
         </div>
-       { !stockData ? (
-    <Spin />
-  ) :
-       ( <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={stockData}
-            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <Tooltip />
-            <Area
-              type="linearClosed"
-              dataKey="n"
-              stroke="none"
-              fill="#8884d8"
-              fillOpacity={0.3}
-            />
-            <Line
-              type="monotone"
-              dataKey="n"
-              stroke="#8884d8"
-              strokeWidth={3}
-            />
-          </LineChart>
-        </ResponsiveContainer>)}
+        {!stockData ? (
+          <Spin />
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={stockData}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <Tooltip />
+              <Area
+                type="linearClosed"
+                dataKey="n"
+                stroke="none"
+                fill="#8884d8"
+                fillOpacity={0.3}
+              />
+              <Line
+                type="monotone"
+                dataKey="n"
+                stroke="#8884d8"
+                strokeWidth={3}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );
