@@ -503,3 +503,23 @@
     }
   }
 }
+
+.dashboard-footer {
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  padding: 1rem 2rem;
+  text-align: center;
+  margin-top: auto;
+  
+  p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.875rem;
+    font-weight: 400;
+    
+    strong {
+      color: #ff6b35;
+      font-weight: 600;
+    }
+  }
+}

@@ -416,6 +416,10 @@ const Dashboard = () => {
       <div className="tabs">
         <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
       </div>
+      
+      <footer className="dashboard-footer">
+        <p>Built by <strong>Yasar Arafath</strong> using React, Recharts, Polygon API and Finnhub WebSocket</p>
+      </footer>
     </div>
   );
 };
