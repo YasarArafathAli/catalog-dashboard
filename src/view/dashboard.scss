@@ -152,7 +152,7 @@
         }
       }
 
-      .range-selector {
+      .range-info {
         background: white;
         padding: 1.5rem;
         border-radius: 8px;
@@ -164,25 +164,21 @@
           font-size: 1.25rem;
         }
 
-        .range-buttons {
+        .range-display {
           display: flex;
+          flex-direction: column;
           gap: 0.5rem;
 
-          .ant-btn {
-            flex: 1;
-            height: 40px;
-            border-radius: 6px;
-            font-weight: 500;
+          .current-range {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4B40EE;
+          }
 
-            &.ant-btn-primary {
-              background: #4B40EE;
-              border-color: #4B40EE;
-
-              &:hover {
-                background: #3B30DE;
-                border-color: #3B30DE;
-              }
-            }
+          .data-source {
+            font-size: 0.875rem;
+            color: #666;
+            font-style: italic;
           }
         }
       }

@@ -19,13 +19,31 @@ export const createFinnhubConnection = (onMessage, onError) => {
     return null;
   }
 
+  // Validate API key format (Finnhub keys are typically 20 characters)
+  if (apiKey.length < 10) {
+    const error = new Error('Invalid Finnhub API key format. Please check your VITE_FINNHUB_API_KEY in .env file');
+    onError(error);
+    return null;
+  }
+
   const wsUrl = `${FINNHUB_WS_URL}?token=${apiKey}`;
   console.log('Connecting to Finnhub WebSocket:', wsUrl);
+  console.log('API Key (first 10 chars):', apiKey.substring(0, 10) + '...');
   
   const ws = new WebSocket(wsUrl);
   
+  // Connection timeout
+  const connectionTimeout = setTimeout(() => {
+    if (ws.readyState === WebSocket.CONNECTING) {
+      console.error('WebSocket connection timeout');
+      ws.close();
+      onError(new Error('WebSocket connection timeout'));
+    }
+  }, 10000); // 10 second timeout
+  
   ws.onopen = () => {
     console.log('Connected to Finnhub WebSocket');
+    clearTimeout(connectionTimeout);
     
     // Subscribe to Bitcoin data
     const subscribeMessage = {
@@ -67,11 +85,19 @@ export const createFinnhubConnection = (onMessage, onError) => {
   
   ws.onerror = (error) => {
     console.error('WebSocket error:', error);
-    onError(error);
+    console.error('WebSocket readyState:', ws.readyState);
+    console.error('WebSocket URL:', ws.url);
+    clearTimeout(connectionTimeout);
+    onError(new Error(`WebSocket connection failed: ${error.type || 'Unknown error'}`));
   };
   
   ws.onclose = (event) => {
     console.log('WebSocket connection closed:', event.code, event.reason);
+    clearTimeout(connectionTimeout);
+    if (event.code !== 1000) {
+      console.error('WebSocket closed unexpectedly with code:', event.code);
+      onError(new Error(`WebSocket closed unexpectedly: ${event.code} - ${event.reason}`));
+    }
   };
   
   // Return connection object with methods
@@ -92,6 +118,41 @@ export const createFinnhubConnection = (onMessage, onError) => {
         ws.close();
         console.log('WebSocket connection closed');
       }
-    }
+    },
+    getReadyState: () => ws.readyState,
+    getUrl: () => ws.url
   };
+};
+
+/**
+ * Test WebSocket connection
+ */
+export const testFinnhubConnection = () => {
+  return new Promise((resolve, reject) => {
+    const apiKey = import.meta.env.VITE_FINNHUB_API_KEY;
+    
+    if (!apiKey || apiKey === 'your_finnhub_api_key_here') {
+      reject(new Error('Finnhub API key not configured'));
+      return;
+    }
+
+    const wsUrl = `${FINNHUB_WS_URL}?token=${apiKey}`;
+    const ws = new WebSocket(wsUrl);
+    
+    const timeout = setTimeout(() => {
+      ws.close();
+      reject(new Error('Connection timeout'));
+    }, 5000);
+
+    ws.onopen = () => {
+      clearTimeout(timeout);
+      ws.close();
+      resolve('Connection successful');
+    };
+
+    ws.onerror = (error) => {
+      clearTimeout(timeout);
+      reject(new Error(`Connection failed: ${error.type}`));
+    };
+  });
 };

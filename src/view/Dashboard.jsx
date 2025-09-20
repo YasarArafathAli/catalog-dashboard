@@ -49,7 +49,7 @@ const Dashboard = () => {
       // Use live WebSocket data for 1D
       startLiveData();
     } else {
-      // Use historic data for 1M and 1Y
+      // Use historic data for other ranges
       await fetchHistoricDataForRange(range);
     }
   };
@@ -59,9 +59,11 @@ const Dashboard = () => {
     setIsLiveMode(true);
     setLoading(true);
     setChartData([]);
+    setError(null);
     
     const onMessage = (priceData) => {
       setLoading(false);
+      setError(null);
       setChartData(prevData => {
         const newData = [...prevData, priceData];
         // Keep only last 50 points for performance
@@ -71,8 +73,13 @@ const Dashboard = () => {
     
     const onError = (error) => {
       console.error('WebSocket error:', error);
-      setError(`Live data error: ${error.message}`);
+      setError(`Live data error: ${error.message}. Falling back to historic data.`);
       setLoading(false);
+      
+      // Fallback to historic data after WebSocket error
+      setTimeout(() => {
+        fetchHistoricDataForRange('1M');
+      }, 2000);
     };
     
     wsConnectionRef.current = createFinnhubConnection(onMessage, onError);
@@ -86,7 +93,20 @@ const Dashboard = () => {
     
     try {
       console.log(`Fetching historic data for range: ${range}`);
-      const data = await fetchHistoricData(range);
+      
+      // Map chart ranges to API ranges
+      let apiRange = range;
+      if (range === '3D') {
+        apiRange = '1M'; // Use 1M for 3D as Polygon doesn't have 3D
+      } else if (range === '1W') {
+        apiRange = '1M'; // Use 1M for 1W as Polygon doesn't have 1W
+      } else if (range === '6M') {
+        apiRange = '1Y'; // Use 1Y for 6M as Polygon doesn't have 6M
+      } else if (range === 'MAX') {
+        apiRange = '1Y'; // Use 1Y for MAX
+      }
+      
+      const data = await fetchHistoricData(apiRange);
       console.log('Historic data received:', data);
       
       if (!data || data.length === 0) {
@@ -137,6 +157,9 @@ const Dashboard = () => {
             chartData={chartData}
             loading={loading}
             error={error}
+            selectedRange={selectedRange}
+            onRangeChange={handleRangeChange}
+            isLiveMode={isLiveMode}
           />
         </div>
       ),
@@ -175,30 +198,13 @@ const Dashboard = () => {
               )}
             </div>
             
-            <div className="range-selector">
-              <h4>Time Range</h4>
-              <div className="range-buttons">
-                <Button
-                  type={selectedRange === '1D' ? 'primary' : 'default'}
-                  onClick={() => handleRangeChange('1D')}
-                  disabled={loading}
-                >
-                  1D
-                </Button>
-                <Button
-                  type={selectedRange === '1M' ? 'primary' : 'default'}
-                  onClick={() => handleRangeChange('1M')}
-                  disabled={loading}
-                >
-                  1M
-                </Button>
-                <Button
-                  type={selectedRange === '1Y' ? 'primary' : 'default'}
-                  onClick={() => handleRangeChange('1Y')}
-                  disabled={loading}
-                >
-                  1Y
-                </Button>
+            <div className="range-info">
+              <h4>Current Range</h4>
+              <div className="range-display">
+                <span className="current-range">{selectedRange}</span>
+                <span className="data-source">
+                  {isLiveMode ? 'Live Data' : 'Historic Data'}
+                </span>
               </div>
             </div>
           </div>
