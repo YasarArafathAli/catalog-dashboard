@@ -51,8 +51,13 @@ export const createFinnhubConnection = (onMessage, onError) => {
       symbol: 'BINANCE:BTCUSDT'
     };
     
-    ws.send(JSON.stringify(subscribeMessage));
-    console.log('Subscribed to BINANCE:BTCUSDT');
+    try {
+      ws.send(JSON.stringify(subscribeMessage));
+      console.log('Subscribed to BINANCE:BTCUSDT');
+    } catch (error) {
+      console.error('Failed to send subscription message:', error);
+      onError(new Error('Failed to subscribe to price updates'));
+    }
   };
   
   ws.onmessage = (event) => {
@@ -88,15 +93,52 @@ export const createFinnhubConnection = (onMessage, onError) => {
     console.error('WebSocket readyState:', ws.readyState);
     console.error('WebSocket URL:', ws.url);
     clearTimeout(connectionTimeout);
-    onError(new Error(`WebSocket connection failed: ${error.type || 'Unknown error'}`));
+    
+    let errorMessage = 'WebSocket connection failed';
+    if (ws.readyState === WebSocket.CONNECTING) {
+      errorMessage = 'Failed to establish WebSocket connection';
+    } else if (ws.readyState === WebSocket.CLOSED) {
+      errorMessage = 'WebSocket connection was closed';
+    } else if (ws.readyState === WebSocket.CLOSING) {
+      errorMessage = 'WebSocket connection is closing';
+    }
+    
+    onError(new Error(errorMessage));
   };
   
   ws.onclose = (event) => {
     console.log('WebSocket connection closed:', event.code, event.reason);
     clearTimeout(connectionTimeout);
+    
+    // Only trigger error if it's not a normal closure
     if (event.code !== 1000) {
       console.error('WebSocket closed unexpectedly with code:', event.code);
-      onError(new Error(`WebSocket closed unexpectedly: ${event.code} - ${event.reason}`));
+      let errorMessage = 'WebSocket connection lost';
+      
+      switch (event.code) {
+        case 1006:
+          errorMessage = 'WebSocket connection lost (abnormal closure)';
+          break;
+        case 1011:
+          errorMessage = 'WebSocket server error';
+          break;
+        case 1012:
+          errorMessage = 'WebSocket server restart';
+          break;
+        case 1013:
+          errorMessage = 'WebSocket server overloaded';
+          break;
+        case 1014:
+          errorMessage = 'WebSocket gateway timeout';
+          break;
+        case 1015:
+          errorMessage = 'WebSocket TLS handshake failed';
+          break;
+        default:
+          errorMessage = `WebSocket closed unexpectedly: ${event.code} - ${event.reason || 'No reason provided'}`;
+      }
+      
+      onError(new Error(errorMessage));
     }
   };
   

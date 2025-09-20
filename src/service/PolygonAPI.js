@@ -2,11 +2,46 @@
  * Polygon.io REST API service for Bitcoin historic data
  */
 
-const POLYGON_BASE_URL = 'https://api.polygon.io/v2/aggs/ticker/X:BTCUSD/range/1/day';
+/**
+ * Get date X days ago
+ * @param {number} days - Number of days ago
+ * @returns {string} Formatted date string (YYYY-MM-DD)
+ */
+const getDateXDaysAgo = (days) => {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date.toISOString().split('T')[0];
+};
+
+/**
+ * Get today's date
+ * @returns {string} Formatted date string (YYYY-MM-DD)
+ */
+const getToday = () => {
+  return new Date().toISOString().split('T')[0];
+};
+
+/**
+ * Convert range string to days
+ * @param {string} range - Range string (1D, 3D, 1W, 1M, 6M, 1Y, MAX)
+ * @returns {number} Number of days
+ */
+const getDaysFromRange = (range) => {
+  switch (range) {
+    case '1D': return 1;
+    case '3D': return 3;
+    case '1W': return 7;
+    case '1M': return 30;
+    case '6M': return 180;
+    case '1Y': return 365;
+    case 'MAX': return 365;
+    default: return 30; // Default to 1 month
+  }
+};
 
 /**
  * Fetch historic Bitcoin data from Polygon.io
- * @param {string} range - '1M' for 1 month, '1Y' for 1 year
+ * @param {string} range - '1D', '3D', '1W', '1M', '6M', '1Y', 'MAX'
  * @returns {Promise<Array>} Array of {time, price} objects
  */
 export const fetchHistoricData = async (range) => {
@@ -17,26 +52,17 @@ export const fetchHistoricData = async (range) => {
       throw new Error('Polygon API key not configured. Please set VITE_POLYGON_API_KEY in .env file');
     }
 
-    // Calculate date range
-    const endDate = new Date();
-    const startDate = new Date();
+    const days = getDaysFromRange(range);
+    const today = getToday();
+    const startDate = getDateXDaysAgo(days);
     
-    if (range === '1M') {
-      startDate.setDate(endDate.getDate() - 30);
-    } else if (range === '1Y') {
-      startDate.setDate(endDate.getDate() - 365);
-    } else {
-      throw new Error('Invalid range. Use "1M" or "1Y"');
-    }
-
-    // Format dates as YYYY-MM-DD
-    const formatDate = (date) => date.toISOString().split('T')[0];
-    const start = formatDate(startDate);
-    const end = formatDate(endDate);
-
-    const url = `${POLYGON_BASE_URL}/${start}/${end}?apiKey=${apiKey}`;
+    // Determine interval and multiplier based on days
+    const interval = days > 7 ? 1 : days === 7 ? 180 : 30;
+    const timespan = days > 7 ? 'day' : 'minute';
     
-    console.log('Fetching historic data from:', url);
+    const url = `https://api.polygon.io/v2/aggs/ticker/X:BTCUSD/range/${interval}/${timespan}/${startDate}/${today}?adjusted=true&sort=asc&apikey=${apiKey}`;
+    
+    console.log(`Fetching ${range} (${days} days) historic data from:`, url);
     
     const response = await fetch(url);
     
@@ -82,8 +108,18 @@ export const fetchHistoricData = async (range) => {
         timestamp = new Date();
       }
       
+      // Format time based on the timespan
+      let timeString;
+      if (timespan === 'minute') {
+        // For minute data, show time with date
+        timeString = timestamp.toLocaleString();
+      } else {
+        // For daily data, show just the date
+        timeString = timestamp.toLocaleDateString();
+      }
+      
       return {
-        time: timestamp.toLocaleDateString(),
+        time: timeString,
         price: result.c || result.close || result.price || 0 // try different price field names
       };
     });

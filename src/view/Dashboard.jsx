@@ -19,9 +19,16 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isLiveMode, setIsLiveMode] = useState(false);
+  const [isSwitchingAPI, setIsSwitchingAPI] = useState(false);
   
   const wsConnectionRef = useRef(null);
-  const maxLiveDataPoints = 50;
+  const retryCountRef = useRef(0);
+  const maxRetries = 3;
+
+  // Load initial historic data on mount
+  useEffect(() => {
+    fetchHistoricDataForRange('1D');
+  }, []);
 
   // Cleanup WebSocket connection on unmount
   useEffect(() => {
@@ -45,12 +52,19 @@ const Dashboard = () => {
       wsConnectionRef.current = null;
     }
     
-    if (range === '1D') {
-      // Use live WebSocket data for 1D
-      startLiveData();
+    // Always use historic data for range changes - no loading state
+    await fetchHistoricDataForRange(range);
+  };
+
+  // Handle live data toggle
+  const handleLiveDataToggle = () => {
+    if (isLiveMode) {
+      // Switch to historic data
+      setSelectedRange('1D');
+      fetchHistoricDataForRange('1D', true); // Show switching state
     } else {
-      // Use historic data for other ranges
-      await fetchHistoricDataForRange(range);
+      // Switch to live data
+      startLiveData();
     }
   };
 
@@ -60,51 +74,95 @@ const Dashboard = () => {
     setLoading(true);
     setChartData([]);
     setError(null);
+    setIsSwitchingAPI(false);
     
     const onMessage = (priceData) => {
       setLoading(false);
       setError(null);
-      setChartData(prevData => {
-        const newData = [...prevData, priceData];
-        // Keep only last 50 points for performance
-        return newData.slice(-maxLiveDataPoints);
-      });
+      retryCountRef.current = 0; // Reset retry count on successful connection
+      // Just update the current price without aggregating data
+      setChartData([priceData]);
     };
     
     const onError = (error) => {
       console.error('WebSocket error:', error);
-      setError(`Live data error: ${error.message}. Falling back to historic data.`);
-      setLoading(false);
       
-      // Fallback to historic data after WebSocket error
-      setTimeout(() => {
-        fetchHistoricDataForRange('1M');
-      }, 2000);
+      // Check if we should retry
+      if (retryCountRef.current < maxRetries) {
+        retryCountRef.current++;
+        console.log(`WebSocket connection failed, retrying... (${retryCountRef.current}/${maxRetries})`);
+        
+        setError(`Connection failed, retrying... (${retryCountRef.current}/${maxRetries})`);
+        
+        // Retry after a delay
+        setTimeout(() => {
+          startLiveData();
+        }, 2000 * retryCountRef.current); // Exponential backoff
+      } else {
+        console.log('Max retries reached, falling back to historic data');
+        
+        // Provide user-friendly error message for WebSocket failures
+        let wsErrorMessage = 'Live data connection failed';
+        if (error.message.includes('connection timeout')) {
+          wsErrorMessage = 'Live data service is unreachable at the moment. Switching to historic data...';
+        } else if (error.message.includes('WebSocket connection failed')) {
+          wsErrorMessage = 'Live data service is temporarily unavailable. Switching to historic data...';
+        } else if (error.message.includes('Failed to establish')) {
+          wsErrorMessage = 'Unable to connect to live data service. Switching to historic data...';
+        } else {
+          wsErrorMessage = `Live data service is unreachable at the moment. ${error.message}. Switching to historic data...`;
+        }
+        
+        setError(wsErrorMessage);
+        setLoading(true);
+        setIsSwitchingAPI(true);
+        
+        // Reset retry count
+        retryCountRef.current = 0;
+        
+        // Fallback to historic data
+        setTimeout(() => {
+          console.log('Falling back to historic data due to WebSocket failure');
+          fetchHistoricDataForRange('1D', true); // Show switching state
+        }, 1000);
+      }
     };
     
-    wsConnectionRef.current = createFinnhubConnection(onMessage, onError);
+    try {
+      wsConnectionRef.current = createFinnhubConnection(onMessage, onError);
+      
+      // Add a timeout to detect if WebSocket never connects
+      const connectionTimeout = setTimeout(() => {
+        if (wsConnectionRef.current && wsConnectionRef.current.ws.readyState !== WebSocket.OPEN) {
+          console.log('WebSocket connection timeout, falling back to historic data');
+          onError(new Error('Connection timeout'));
+        }
+      }, 10000); // 10 second timeout
+      
+      // Clear timeout if connection succeeds
+      if (wsConnectionRef.current && wsConnectionRef.current.ws.readyState === WebSocket.OPEN) {
+        clearTimeout(connectionTimeout);
+      }
+    } catch (error) {
+      console.error('Failed to create WebSocket connection:', error);
+      onError(error);
+    }
   };
 
   // Fetch historic data
-  const fetchHistoricDataForRange = async (range) => {
+  const fetchHistoricDataForRange = async (range, showSwitchingState = false) => {
     setIsLiveMode(false);
-    setLoading(true);
     setError(null);
+    
+    if (showSwitchingState) {
+      setIsSwitchingAPI(true);
+    }
     
     try {
       console.log(`Fetching historic data for range: ${range}`);
       
-      // Map chart ranges to API ranges
-      let apiRange = range;
-      if (range === '3D') {
-        apiRange = '1M'; // Use 1M for 3D as Polygon doesn't have 3D
-      } else if (range === '1W') {
-        apiRange = '1M'; // Use 1M for 1W as Polygon doesn't have 1W
-      } else if (range === '6M') {
-        apiRange = '1Y'; // Use 1Y for 6M as Polygon doesn't have 6M
-      } else if (range === 'MAX') {
-        apiRange = '1Y'; // Use 1Y for MAX
-      }
+      // All ranges are now supported by the improved Polygon API
+      const apiRange = range;
       
       const data = await fetchHistoricData(apiRange);
       console.log('Historic data received:', data);
@@ -117,10 +175,32 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.error('Error fetching historic data:', err);
-      setError(`Failed to load historic data: ${err.message}`);
+      
+      // Provide user-friendly error messages based on error type
+      let errorMessage = 'Failed to load historic data';
+      
+      if (err.message.includes('429')) {
+        errorMessage = 'API limit exceeded. Please try again later or check your API key limits.';
+      } else if (err.message.includes('401') || err.message.includes('403')) {
+        errorMessage = 'API key is invalid or expired. Please check your API configuration.';
+      } else if (err.message.includes('404')) {
+        errorMessage = 'API endpoint not found. The service may be temporarily unavailable.';
+      } else if (err.message.includes('500') || err.message.includes('502') || err.message.includes('503')) {
+        errorMessage = 'API is unreachable at the moment. Please try again later.';
+      } else if (err.message.includes('NetworkError') || err.message.includes('fetch')) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      } else if (err.message.includes('API key not configured')) {
+        errorMessage = 'API key not configured. Please set up your API keys in the environment file.';
+      } else {
+        errorMessage = `API is unreachable at the moment. ${err.message}`;
+      }
+      
+      setError(errorMessage);
       setChartData([]);
     } finally {
-      setLoading(false);
+      if (showSwitchingState) {
+        setIsSwitchingAPI(false);
+      }
     }
   };
 
@@ -155,11 +235,13 @@ const Dashboard = () => {
         <div className="chart-section">
           <BitcoinChart
             chartData={chartData}
-            loading={loading}
+            loading={loading || isSwitchingAPI}
             error={error}
             selectedRange={selectedRange}
             onRangeChange={handleRangeChange}
+            onLiveDataToggle={handleLiveDataToggle}
             isLiveMode={isLiveMode}
+            isSwitchingAPI={isSwitchingAPI}
           />
         </div>
       ),
@@ -203,7 +285,7 @@ const Dashboard = () => {
               <div className="range-display">
                 <span className="current-range">{selectedRange}</span>
                 <span className="data-source">
-                  {isLiveMode ? 'Live Data' : 'Historic Data'}
+                  {isLiveMode ? 'Live Data (Real-time)' : 'Historic Data (Polygon)'}
                 </span>
               </div>
             </div>
@@ -211,9 +293,31 @@ const Dashboard = () => {
           
           {error && (
             <Alert
-              message="Error"
-              description={error}
-              type="error"
+              message={error.includes('retrying') ? "Connection Issue" : "Error"}
+              description={
+                <div>
+                  <p>{error}</p>
+                  {(error.includes('retrying') || error.includes('API') || error.includes('unreachable')) && (
+                    <Button 
+                      size="small" 
+                      type="primary" 
+                      onClick={() => {
+                        retryCountRef.current = 0;
+                        setError(null);
+                        if (error.includes('retrying')) {
+                          startLiveData();
+                        } else {
+                          fetchHistoricDataForRange(selectedRange, true); // Show switching state
+                        }
+                      }}
+                      style={{ marginTop: 8 }}
+                    >
+                      {error.includes('retrying') ? 'Retry Live Data' : 'Retry Historic Data'}
+                    </Button>
+                  )}
+                </div>
+              }
+              type={error.includes('retrying') ? "warning" : "error"}
               showIcon
               closable
               onClose={() => setError(null)}
@@ -237,7 +341,7 @@ const Dashboard = () => {
             </div>
             <div className="stat-card">
               <h4>Data Source</h4>
-              <p>{isLiveMode ? 'Live WebSocket' : 'Historic API'}</p>
+              <p>{isLiveMode ? 'Live WebSocket (Real-time)' : 'Historic API (Polygon)'}</p>
             </div>
             <div className="stat-card">
               <h4>Time Range</h4>

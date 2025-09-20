@@ -80,6 +80,7 @@
         font-weight: 500;
         padding: 4px 8px;
         border-radius: 4px;
+        transition: all 0.3s ease;
 
         &.live {
           color: #67BF6B;
@@ -98,6 +99,16 @@
           .data-source-dot {
             background: #4B40EE;
             animation: none;
+          }
+        }
+
+        &.switching {
+          color: #FFA500;
+          background: rgba(255, 165, 0, 0.1);
+
+          .data-source-dot {
+            background: #FFA500;
+            animation: pulse 1s infinite;
           }
         }
 
@@ -202,6 +213,15 @@
       margin-top: 16px;
       color: #666;
       font-size: 14px;
+      font-weight: 500;
+    }
+
+    .ant-spin {
+      .ant-spin-dot {
+        i {
+          background-color: #4B40EE;
+        }
+      }
     }
   }
 
@@ -255,5 +275,60 @@
     margin: 0;
     color: #f7931a;
     font-weight: bold;
+  }
+}
+
+// Y-axis styling
+.recharts-yAxis {
+  .recharts-text {
+    font-size: 12px;
+    fill: #666;
+  }
+}
+
+.recharts-cartesian-axis-tick-value {
+  font-size: 12px;
+  fill: #666;
+}
+
+// Live price display styling
+.live-price-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  text-align: center;
+  padding: 40px;
+
+  .live-price-value {
+    font-size: 48px;
+    font-weight: bold;
+    color: #4B40EE;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(75, 64, 238, 0.3);
+  }
+
+  .live-price-time {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  .live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    color: #67BF6B;
+    font-weight: 500;
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #67BF6B;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
   }
 }
