@@ -70,7 +70,7 @@ export const createFinnhubConnection = (onMessage, onError) => {
         const tradeData = data.data?.[0];
         if (tradeData && tradeData.p) {
           const priceData = {
-            time: new Date().toLocaleTimeString(),
+            time: new Date().toISOString(), // Use ISO string for proper date handling
             price: tradeData.p
           };
           onMessage(priceData);

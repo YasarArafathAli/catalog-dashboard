@@ -19,18 +19,26 @@ const Dashboard = () => {
   const [selectedRange, setSelectedRange] = useState('1D');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isLiveMode, setIsLiveMode] = useState(false);
-  const [isSwitchingAPI, setIsSwitchingAPI] = useState(false);
   const [isStaleData, setIsStaleData] = useState(false);
   const [livePrice, setLivePrice] = useState(null);
+  const [isLiveConnected, setIsLiveConnected] = useState(false);
+  const [hasReceivedLiveData, setHasReceivedLiveData] = useState(false);
+  const [storedLivePrice, setStoredLivePrice] = useState(null); // Store the last successful live price
   
   const wsConnectionRef = useRef(null);
   const retryCountRef = useRef(0);
   const maxRetries = 3;
 
-  // Load initial historic data on mount
+  // Load initial historic data on mount and start live updates
   useEffect(() => {
-    fetchHistoricDataForRange('1D');
+    const initializeDashboard = async () => {
+      // First load historic data
+      await fetchHistoricDataForRange('1D');
+      // Then start live updates
+      startLiveData();
+    };
+    
+    initializeDashboard();
   }, []);
 
   // Cleanup WebSocket connection on unmount
@@ -59,77 +67,45 @@ const Dashboard = () => {
     await fetchHistoricDataForRange(range);
   };
 
-  // Handle live data toggle
-  const handleLiveDataToggle = () => {
-    if (isLiveMode) {
-      // Switch to historic data
-      setSelectedRange('1D');
-      setLivePrice(null); // Clear live price
-      fetchHistoricDataForRange('1D', true); // Show switching state
-    } else {
-      // Switch to live data
-      startLiveData();
-    }
-  };
 
   // Start live data stream
   const startLiveData = () => {
-    setIsLiveMode(true);
-    setLoading(true);
-    setChartData([]); // Clear chart data for live mode
-    setLivePrice(null); // Clear previous live price
     setError(null);
-    setIsSwitchingAPI(false);
+    setIsLiveConnected(false);
+    setLivePrice(null); // Clear any previous live price
+    setHasReceivedLiveData(false); // Reset live data flag
     
     const onMessage = (priceData) => {
-      setLoading(false);
+      console.log('Live data received:', priceData);
       setError(null);
       retryCountRef.current = 0; // Reset retry count on successful connection
+      setIsLiveConnected(true);
+      setHasReceivedLiveData(true); // Mark that we've received live data
       // Set live price for display, don't modify chart data
       setLivePrice(priceData);
+      // Store the live price so we can keep showing it even if WebSocket disconnects
+      setStoredLivePrice(priceData);
     };
     
     const onError = (error) => {
       console.error('WebSocket error:', error);
+      setIsLiveConnected(false);
       
       // Check if we should retry
       if (retryCountRef.current < maxRetries) {
         retryCountRef.current++;
         console.log(`WebSocket connection failed, retrying... (${retryCountRef.current}/${maxRetries})`);
         
-        setError(`Connection failed, retrying... (${retryCountRef.current}/${maxRetries})`);
-        
         // Retry after a delay
         setTimeout(() => {
           startLiveData();
         }, 2000 * retryCountRef.current); // Exponential backoff
       } else {
-        console.log('Max retries reached, falling back to historic data');
-        
-        // Provide user-friendly error message for WebSocket failures
-        let wsErrorMessage = 'Live data connection failed';
-        if (error.message.includes('connection timeout')) {
-          wsErrorMessage = 'Live data service is unreachable at the moment. Switching to historic data...';
-        } else if (error.message.includes('WebSocket connection failed')) {
-          wsErrorMessage = 'Live data service is temporarily unavailable. Switching to historic data...';
-        } else if (error.message.includes('Failed to establish')) {
-          wsErrorMessage = 'Unable to connect to live data service. Switching to historic data...';
-        } else {
-          wsErrorMessage = `Live data service is unreachable at the moment. ${error.message}. Switching to historic data...`;
-        }
-        
-        setError(wsErrorMessage);
-        setLoading(true);
-        setIsSwitchingAPI(true);
-        
-        // Reset retry count
-        retryCountRef.current = 0;
-        
-        // Fallback to historic data
-        setTimeout(() => {
-          console.log('Falling back to historic data due to WebSocket failure');
-          fetchHistoricDataForRange('1D', true); // Show switching state
-        }, 1000);
+        console.log('Max retries reached, keeping stored live price if available');
+        // Don't clear live data - keep showing the stored live price
+        setLivePrice(null); // Clear current live price but keep storedLivePrice
+        // Don't clear hasReceivedLiveData - we want to keep showing stored price
+        // Don't show error to user, just continue with stored live data
       }
     };
     
@@ -156,14 +132,9 @@ const Dashboard = () => {
 
 
   // Fetch historic data
-  const fetchHistoricDataForRange = async (range, showSwitchingState = false) => {
-    setIsLiveMode(false);
+  const fetchHistoricDataForRange = async (range) => {
     setError(null);
     setIsStaleData(false); // Reset stale data state
-    
-    if (showSwitchingState) {
-      setIsSwitchingAPI(true);
-    }
     
     try {
       console.log(`Fetching historic data for range: ${range}`);
@@ -178,6 +149,7 @@ const Dashboard = () => {
         setError('No historic data available for the selected range');
         setChartData([]);
       } else {
+        console.log('Setting chart data:', data.length, 'points');
         setChartData(data);
         setIsStaleData(false); // Real data, not stale
       }
@@ -187,6 +159,7 @@ const Dashboard = () => {
       // Show placeholder data instead of empty chart
       console.log('Using placeholder data due to API error');
       const placeholderData = getPlaceholderData();
+      console.log('Setting placeholder data:', placeholderData.length, 'points');
       setChartData(placeholderData);
       setIsStaleData(true); // Mark as stale data
       
@@ -211,28 +184,41 @@ const Dashboard = () => {
       
       setError(errorMessage);
     } finally {
-      if (showSwitchingState) {
-        setIsSwitchingAPI(false);
-      }
+      // Cleanup completed
     }
   };
 
-  // Initialize with 1D live data
-  useEffect(() => {
-    handleRangeChange('1D');
-  }, []);
 
   const getCurrentPrice = () => {
-    if (isLiveMode && livePrice) {
+    console.log('getCurrentPrice called - hasReceivedLiveData:', hasReceivedLiveData, 'livePrice:', livePrice, 'storedLivePrice:', storedLivePrice);
+    
+    // First priority: Current live price if WebSocket is connected
+    if (isLiveConnected && livePrice && livePrice.price) {
+      console.log('Using current live price:', livePrice.price);
       return livePrice.price;
     }
-    if (chartData.length === 0) return null;
+    
+    // Second priority: Stored live price if we've ever received live data
+    if (hasReceivedLiveData && storedLivePrice && storedLivePrice.price) {
+      console.log('Using stored live price:', storedLivePrice.price);
+      return storedLivePrice.price;
+    }
+    
+    // Only fallback to historic data if we never received live data
+    if (chartData.length === 0) {
+      console.log('No chart data available');
+      return null;
+    }
+    
+    console.log('Using historic price:', chartData[chartData.length - 1].price);
     return chartData[chartData.length - 1].price;
   };
 
   const getPriceChange = () => {
-    if (chartData.length < 2) return null;
-    const current = chartData[chartData.length - 1].price;
+    // Use live price if available, otherwise use historic data
+    const current = getCurrentPrice();
+    if (!current || chartData.length < 2) return null;
+    
     const previous = chartData[chartData.length - 2].price;
     const change = current - previous;
     const changePercent = (change / previous) * 100;
@@ -251,15 +237,12 @@ const Dashboard = () => {
         <div className="chart-section">
           <BitcoinChart
             chartData={chartData}
-            loading={loading || isSwitchingAPI}
+            loading={loading}
             error={error}
             selectedRange={selectedRange}
             onRangeChange={handleRangeChange}
-            onLiveDataToggle={handleLiveDataToggle}
-            isLiveMode={isLiveMode}
-            isSwitchingAPI={isSwitchingAPI}
+            isLiveConnected={isLiveConnected}
             isStaleData={isStaleData}
-            livePrice={livePrice}
           />
         </div>
       ),
@@ -276,7 +259,11 @@ const Dashboard = () => {
             </div>
             <div className="stat-card">
               <h4>Data Source</h4>
-              <p>{isLiveMode ? 'Live WebSocket (Real-time)' : 'Historic API (Polygon)'}</p>
+              <p>
+                {isLiveConnected && livePrice && livePrice.price ? 'Live WebSocket (Real-time)' : 
+                 hasReceivedLiveData && storedLivePrice && storedLivePrice.price ? 'Live WebSocket (Cached)' : 
+                 'Historic API (Polygon)'}
+              </p>
             </div>
             <div className="stat-card">
               <h4>Time Range</h4>
@@ -284,11 +271,16 @@ const Dashboard = () => {
             </div>
             <div className="stat-card">
               <h4>Current Price</h4>
-              <p>{chartData.length > 0 ? `$${chartData[chartData.length - 1].price?.toFixed(2)}` : 'N/A'}</p>
+              <p>{currentPrice ? `$${currentPrice.toFixed(2)}` : 'N/A'}</p>
             </div>
             <div className="stat-card">
               <h4>Status</h4>
-              <p>{loading ? 'Loading...' : isLiveMode ? 'Live' : 'Ready'}</p>
+              <p>
+                {loading ? 'Loading...' : 
+                 (isLiveConnected && livePrice && livePrice.price) ? 'Live' : 
+                 (hasReceivedLiveData && storedLivePrice && storedLivePrice.price) ? 'Cached Live' : 
+                 'Ready'}
+              </p>
             </div>
             <div className="stat-card">
               <h4>Price Change Today</h4>
@@ -362,12 +354,52 @@ const Dashboard = () => {
                 ({priceChange.changePercent >= 0 ? '+' : ''}{priceChange.changePercent.toFixed(2)}%)
               </div>
             )}
-            {isLiveMode && (
-              <div className="live-indicator">
-                <span className="live-dot"></span>
-                Live Updates
+            <div className="live-indicator">
+              <span className="live-dot"></span>
+              <div className="indicator-content">
+                <div className="indicator-label">
+                Last Updated:
+                </div>
+                <div className="indicator-time">
+                  <span className="time-value">
+                    {(() => {
+                      // Get the time to display
+                      let timeToShow;
+                      
+                      // First try current live price
+                      if (isLiveConnected && livePrice && livePrice.time) {
+                        const liveTime = new Date(livePrice.time);
+                        if (!isNaN(liveTime.getTime())) {
+                          timeToShow = liveTime;
+                        } else {
+                          timeToShow = new Date();
+                        }
+                      }
+                      // Then try stored live price
+                      else if (hasReceivedLiveData && storedLivePrice && storedLivePrice.time) {
+                        const storedTime = new Date(storedLivePrice.time);
+                        if (!isNaN(storedTime.getTime())) {
+                          timeToShow = storedTime;
+                        } else {
+                          timeToShow = new Date();
+                        }
+                      }
+                      // Fallback to current time
+                      else {
+                        timeToShow = new Date();
+                      }
+                      
+                      return timeToShow.toLocaleTimeString('en-US', {
+                        hour12: true,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                      });
+                    })()}
+                  </span>
+                </div>
               </div>
-            )}
+            </div>
           </div>
           
           {/* <div className="range-info">
@@ -375,7 +407,7 @@ const Dashboard = () => {
             <div className="range-display">
               <span className="current-range">{selectedRange}</span>
               <span className="data-source">
-                {isLiveMode ? 'Live Data (Real-time)' : 'Historic Data (Polygon)'}
+                {isLiveConnected ? 'Live Data (Real-time)' : 'Historic Data (Polygon)'}
               </span>
             </div>
           </div> */}

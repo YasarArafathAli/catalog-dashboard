@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -12,7 +12,6 @@ import { Spin, Button } from 'antd';
 import {
   ExpandAltOutlined,
   ShrinkOutlined,
-  PlusCircleOutlined,
 } from '@ant-design/icons';
 import './bitcoin-chart.scss';
 
@@ -24,11 +23,8 @@ import './bitcoin-chart.scss';
  * @param {string} props.error - Error message
  * @param {string} props.selectedRange - Currently selected time range
  * @param {Function} props.onRangeChange - Callback for range changes
- * @param {Function} props.onLiveDataToggle - Callback for live data toggle
- * @param {boolean} props.isLiveMode - Whether live data is active
- * @param {boolean} props.isSwitchingAPI - Whether API is currently switching
+ * @param {boolean} props.isLiveConnected - Whether live data is connected
  * @param {boolean} props.isStaleData - Whether showing stale/sample data
- * @param {Object} props.livePrice - Live price data object
  */
 const BitcoinChart = ({ 
   chartData = [], 
@@ -36,33 +32,25 @@ const BitcoinChart = ({
   error = null, 
   selectedRange = '1D',
   onRangeChange = () => {},
-  onLiveDataToggle = () => {},
-  isLiveMode = false,
-  isSwitchingAPI = false,
-  isStaleData = false,
-  livePrice = null
+  isLiveConnected = false,
+  isStaleData = false
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isLiveData, setIsLiveData] = useState(isLiveMode);
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
-  };
-
-  const toggleDataSource = () => {
-    setIsLiveData(!isLiveData);
-    // Trigger live data toggle
-    onLiveDataToggle();
   };
 
   const handleTimeClick = (range) => () => {
     onRangeChange(range);
   };
 
-  // Sync internal state with prop
-  useEffect(() => {
-    setIsLiveData(isLiveMode);
-  }, [isLiveMode]);
+  // Memoize chart data to prevent unnecessary re-renders
+  const memoizedChartData = useMemo(() => {
+    console.log('Chart data memoized:', chartData.length, 'points');
+    return chartData;
+  }, [chartData]);
+
 
   // Handle escape key for fullscreen
   useEffect(() => {
@@ -101,12 +89,7 @@ const BitcoinChart = ({
     return (
       <div className="bitcoin-chart loading">
         <Spin size="large" />
-        <p>
-          {isSwitchingAPI 
-            ? 'Switching data source...' 
-            : 'Loading Bitcoin data...'
-          }
-        </p>
+        <p>Loading Bitcoin data...</p>
       </div>
     );
   }
@@ -119,81 +102,12 @@ const BitcoinChart = ({
     );
   }
 
-  // For live data, show a simplified view with just current price
-  if (isLiveMode && livePrice) {
-    return (
-      <div className="bitcoin-chart" style={{ textAlign: 'center' }}>
-        <div
-          className={`graph-container ${
-            isFullscreen ? 'graph-container--fullscreen' : ''
-          }`}
-        >
-          <div className="chart-header">
-            <span className="current-value">
-              {livePrice.price ? `$${livePrice.price.toFixed(2)}` : 'Loading...'}
-            </span>
-            <div className={`data-source-indicator live`}>
-              <span className="data-source-dot"></span>
-              Live Data (Real-time)
-            </div>
-          </div>
-
-          <div className="toolbar">
-            <div className="toolbar--left">
-              <Button type="link" onClick={toggleFullscreen}>
-                {isFullscreen ? (
-                  <>
-                    <ShrinkOutlined />
-                    Exit Fullscreen
-                  </>
-                ) : (
-                  <>
-                    <ExpandAltOutlined />
-                    Fullscreen
-                  </>
-                )}
-              </Button>
-              <Button 
-                type="primary"
-                onClick={toggleDataSource}
-              >
-                <PlusCircleOutlined />
-                Stop Live Data
-              </Button>
-              {isFullscreen && (
-                <Button 
-                  type="link" 
-                  onClick={() => setIsFullscreen(false)}
-                  className="close-fullscreen"
-                >
-                  ✕ Close
-                </Button>
-              )}
-            </div>
-          </div>
-          
-          <div className="live-price-display">
-            <div className="live-price-value">
-              ${livePrice.price?.toFixed(2) || '0.00'}
-            </div>
-            <div className="live-price-time">
-              Last updated: {livePrice.time || 'Now'}
-            </div>
-            <div className="live-indicator">
-              <span className="live-dot"></span>
-              Live Updates Active
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Calculate dynamic Y-axis domain for better data visualization
   const getYAxisDomain = () => {
-    if (chartData.length === 0) return ['dataMin', 'dataMax'];
+    if (memoizedChartData.length === 0) return ['dataMin', 'dataMax'];
     
-    const prices = chartData.map(d => d.price).filter(price => price != null && !isNaN(price));
+    const prices = memoizedChartData.map(d => d.price).filter(price => price != null && !isNaN(price));
     if (prices.length === 0) return ['dataMin', 'dataMax'];
     
     const minPrice = Math.min(...prices);
@@ -236,15 +150,13 @@ const BitcoinChart = ({
       >
         <div className="chart-header">
           <span className="current-value">
-            {chartData.length > 0 && `$${chartData[chartData.length - 1].price?.toFixed(2)}`}
+            {memoizedChartData.length > 0 && `$${memoizedChartData[memoizedChartData.length - 1].price?.toFixed(2)}`}
           </span>
-          <div className={`data-source-indicator ${isLiveData ? 'live' : isStaleData ? 'stale' : 'historic'} ${isSwitchingAPI ? 'switching' : ''}`}>
+          <div className={`data-source-indicator ${isStaleData ? 'stale' : 'historic'}`}>
             <span className="data-source-dot"></span>
-            {isSwitchingAPI 
-              ? 'Switching API...' 
-              : isStaleData 
-                ? 'Stale Data (Sample)'
-                : (isLiveData ? 'Live Data (Real-time)' : 'Historic Data (Polygon)')
+            {isStaleData 
+              ? 'Stale Data (Sample)'
+              : 'Historic Data (Polygon)'
             }
           </div>
         </div>
@@ -273,13 +185,6 @@ const BitcoinChart = ({
                 </>
               )}
             </Button>
-            <Button 
-              type={isLiveData ? 'primary' : 'link'}
-              onClick={toggleDataSource}
-            >
-              <PlusCircleOutlined />
-              {isLiveData ? 'Stop Live Data' : 'Start Live Data'}
-            </Button>
             {isFullscreen && (
               <Button 
                 type="link" 
@@ -294,8 +199,7 @@ const BitcoinChart = ({
             <Button
               type={selectedRange === '1D' ? 'primary' : 'link'}
               onClick={handleTimeClick('1D')}
-              disabled={isLiveMode}
-              title={isLiveMode ? 'Use Live Data toggle for real-time data' : '1 Day historic data (minute intervals)'}
+              title="1 Day historic data (minute intervals)"
             >
               1D
             </Button>
@@ -346,7 +250,7 @@ const BitcoinChart = ({
         
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={chartData}
+            data={memoizedChartData}
             margin={{ top: 30, right: 30, left: 30, bottom: 30 }}
           >
             <CartesianGrid horizontal vertical stroke="#ff6b35" strokeOpacity={0.3} />
