@@ -1,0 +1,328 @@
+.bitcoin-chart {
+  .graph-container {
+    position: relative;
+    height: 500px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    padding-top: 140px; // Add space for header and toolbar
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+
+    &--fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      background: #fff;
+      border-radius: 0;
+      margin: 0;
+      padding: 20px;
+      padding-top: 140px;
+      box-shadow: none;
+      overflow: hidden;
+      
+      .chart-header {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        margin-bottom: 60px;
+        padding: 15px 20px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+      
+      .toolbar {
+        position: absolute;
+        top: 80px;
+        left: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .chart-header {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      margin-bottom: 60px; // Add space for toolbar
+
+      .current-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #ff6b35;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 8px 12px;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .data-source-indicator {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+
+        &.live {
+          color: #67BF6B;
+          background: rgba(103, 191, 107, 0.1);
+
+          .data-source-dot {
+            background: #67BF6B;
+            animation: pulse 2s infinite;
+          }
+        }
+
+        &.historic {
+          color: #ff6b35;
+          background: rgba(75, 64, 238, 0.1);
+
+          .data-source-dot {
+            background: #ff6b35;
+            animation: none;
+          }
+        }
+
+        &.switching {
+          color: #FFA500;
+          background: rgba(255, 165, 0, 0.1);
+
+          .data-source-dot {
+            background: #FFA500;
+            animation: pulse 1s infinite;
+          }
+        }
+
+        &.stale {
+          color: #FF6B6B;
+          background: rgba(255, 107, 107, 0.1);
+
+          .data-source-dot {
+            background: #FF6B6B;
+            animation: none;
+          }
+        }
+
+        .data-source-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+        }
+      }
+    }
+
+    .error-banner {
+      background: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.3);
+      border-radius: 6px;
+      margin: 8px 0;
+      padding: 8px 12px;
+
+      .error-banner-content {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #FF6B6B;
+
+        .error-icon {
+          font-size: 14px;
+        }
+
+        .error-text {
+          flex: 1;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .toolbar {
+      position: absolute;
+      top: 80px; // Position below chart header
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 6px;
+      z-index: 5;
+
+      &--left {
+        display: flex;
+        gap: 10px;
+        padding: 0 10px;
+
+        .ant-btn {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          color: #666;
+          padding: 6px 12px;
+          border-radius: 4px;
+          
+          &:hover {
+            color: #ff6b35;
+            background: rgba(75, 64, 238, 0.1);
+          }
+
+          &.close-fullscreen {
+            color: #ff4d4f;
+            
+            &:hover {
+              color: #ff7875;
+              background: rgba(255, 77, 79, 0.1);
+            }
+          }
+        }
+      }
+
+      &--right {
+        display: flex;
+        gap: 5px;
+        padding: 0 10px;
+
+        .ant-btn {
+          min-width: 40px;
+          height: 32px;
+          border-radius: 4px;
+          font-weight: 500;
+          font-size: 12px;
+          padding: 6px 12px;
+
+          &.ant-btn-primary {
+            background: #ff6b35;
+            border-color: #ff6b35;
+
+            &:hover {
+              background: #e55a2b;
+              border-color: #e55a2b;
+            }
+          }
+
+          &.ant-btn-link {
+            color: #666;
+
+            &:hover {
+              color: #ff6b35;
+              background: rgba(75, 64, 238, 0.1);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    text-align: center;
+
+    p {
+      margin-top: 16px;
+      color: #666;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .ant-spin {
+      .ant-spin-dot {
+        i {
+          background-color: #ff6b35;
+        }
+      }
+    }
+  }
+
+  &.error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    text-align: center;
+
+    .error-message {
+      h3 {
+        color: #ff4d4f;
+        margin-bottom: 8px;
+      }
+
+      p {
+        color: #666;
+        margin: 0;
+      }
+    }
+  }
+
+  &.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    text-align: center;
+
+    p {
+      color: #666;
+      font-size: 16px;
+    }
+  }
+}
+
+.custom-tooltip {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+
+  .tooltip-time {
+    margin: 0 0 4px 0;
+    font-weight: 500;
+  }
+
+  .tooltip-price {
+    margin: 0;
+    color: #f7931a;
+    font-weight: bold;
+  }
+}
+
+// Y-axis styling
+.recharts-yAxis {
+  .recharts-text {
+    font-size: 12px;
+    fill: #666;
+  }
+}
+
+.recharts-cartesian-axis-tick-value {
+  font-size: 12px;
+  fill: #666;
+}
+
