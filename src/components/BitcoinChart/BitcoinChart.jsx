@@ -349,11 +349,11 @@ const BitcoinChart = ({
             data={chartData}
             margin={{ top: 30, right: 30, left: 30, bottom: 30 }}
           >
-            <CartesianGrid horizontal vertical stroke="#ccc" />
+            <CartesianGrid horizontal vertical stroke="#ff6b35" strokeOpacity={0.3} />
             <Tooltip
               className="tooltip--content"
               content={<CustomTooltip />}
-              cursor={{ strokeDasharray: '3 3' }}
+              cursor={{ strokeDasharray: '3 3', stroke: '#ff6b35', strokeOpacity: 0.5 }}
               allowEscapeViewBox={{ x: true, y: true }}
             />
             <XAxis 
@@ -364,7 +364,7 @@ const BitcoinChart = ({
             />
             <YAxis 
               domain={getYAxisDomain()}
-              tick={{ fontSize: 12, fill: '#666' }}
+              tick={{ fontSize: 12, fill: '#ff6b35' }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(value) => {
@@ -381,10 +381,10 @@ const BitcoinChart = ({
             <Line
               type="monotone"
               dataKey="price"
-              stroke="#4B40EE"
+              stroke="#ff6b35"
               strokeWidth={3}
               dot={false}
-              activeDot={{ r: 4, fill: '#4B40EE' }}
+              activeDot={{ r: 4, fill: '#ff6b35' }}
             />
           </LineChart>
         </ResponsiveContainer>

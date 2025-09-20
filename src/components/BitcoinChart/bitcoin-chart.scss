@@ -65,7 +65,7 @@
       .current-value {
         font-size: 24px;
         font-weight: bold;
-        color: #4B40EE;
+        color: #ff6b35;
         background: rgba(255, 255, 255, 0.9);
         padding: 8px 12px;
         border-radius: 6px;
@@ -93,11 +93,11 @@
         }
 
         &.historic {
-          color: #4B40EE;
+          color: #ff6b35;
           background: rgba(75, 64, 238, 0.1);
 
           .data-source-dot {
-            background: #4B40EE;
+            background: #ff6b35;
             animation: none;
           }
         }
@@ -185,7 +185,7 @@
           border-radius: 4px;
           
           &:hover {
-            color: #4B40EE;
+            color: #ff6b35;
             background: rgba(75, 64, 238, 0.1);
           }
 
@@ -214,12 +214,12 @@
           padding: 6px 12px;
 
           &.ant-btn-primary {
-            background: #4B40EE;
-            border-color: #4B40EE;
+            background: #ff6b35;
+            border-color: #ff6b35;
 
             &:hover {
-              background: #3B30DE;
-              border-color: #3B30DE;
+              background: #e55a2b;
+              border-color: #e55a2b;
             }
           }
 
@@ -227,7 +227,7 @@
             color: #666;
 
             &:hover {
-              color: #4B40EE;
+              color: #ff6b35;
               background: rgba(75, 64, 238, 0.1);
             }
           }
@@ -254,7 +254,7 @@
     .ant-spin {
       .ant-spin-dot {
         i {
-          background-color: #4B40EE;
+          background-color: #ff6b35;
         }
       }
     }
@@ -339,7 +339,7 @@
   .live-price-value {
     font-size: 48px;
     font-weight: bold;
-    color: #4B40EE;
+          color: #ff6b35;
     margin-bottom: 20px;
     text-shadow: 0 2px 4px rgba(75, 64, 238, 0.3);
   }

@@ -370,7 +370,7 @@ const Dashboard = () => {
             )}
           </div>
           
-          <div className="range-info">
+          {/* <div className="range-info">
             <h4>Current Range</h4>
             <div className="range-display">
               <span className="current-range">{selectedRange}</span>
@@ -378,7 +378,7 @@ const Dashboard = () => {
                 {isLiveMode ? 'Live Data (Real-time)' : 'Historic Data (Polygon)'}
               </span>
             </div>
-          </div>
+          </div> */}
         </div>
       </header>
       <div className="tabs">
