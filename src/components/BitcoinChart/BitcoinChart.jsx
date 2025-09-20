@@ -24,6 +24,11 @@ import './bitcoin-chart.scss';
  * @param {string} props.error - Error message
  * @param {string} props.selectedRange - Currently selected time range
  * @param {Function} props.onRangeChange - Callback for range changes
+ * @param {Function} props.onLiveDataToggle - Callback for live data toggle
+ * @param {boolean} props.isLiveMode - Whether live data is active
+ * @param {boolean} props.isSwitchingAPI - Whether API is currently switching
+ * @param {boolean} props.isStaleData - Whether showing stale/sample data
+ * @param {Object} props.livePrice - Live price data object
  */
 const BitcoinChart = ({ 
   chartData = [], 
@@ -33,7 +38,9 @@ const BitcoinChart = ({
   onRangeChange = () => {},
   onLiveDataToggle = () => {},
   isLiveMode = false,
-  isSwitchingAPI = false
+  isSwitchingAPI = false,
+  isStaleData = false,
+  livePrice = null
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isLiveData, setIsLiveData] = useState(isLiveMode);
@@ -79,7 +86,7 @@ const BitcoinChart = ({
     };
   }, [isFullscreen]);
 
-  if (error) {
+  if (error && (!chartData || chartData.length === 0)) {
     return (
       <div className="bitcoin-chart error">
         <div className="error-message">
@@ -113,7 +120,7 @@ const BitcoinChart = ({
   }
 
   // For live data, show a simplified view with just current price
-  if (isLiveMode && chartData.length === 1) {
+  if (isLiveMode && livePrice) {
     return (
       <div className="bitcoin-chart" style={{ textAlign: 'center' }}>
         <div
@@ -123,7 +130,7 @@ const BitcoinChart = ({
         >
           <div className="chart-header">
             <span className="current-value">
-              {chartData[0].price ? `$${chartData[0].price.toFixed(2)}` : 'Loading...'}
+              {livePrice.price ? `$${livePrice.price.toFixed(2)}` : 'Loading...'}
             </span>
             <div className={`data-source-indicator live`}>
               <span className="data-source-dot"></span>
@@ -167,10 +174,10 @@ const BitcoinChart = ({
           
           <div className="live-price-display">
             <div className="live-price-value">
-              ${chartData[0].price?.toFixed(2) || '0.00'}
+              ${livePrice.price?.toFixed(2) || '0.00'}
             </div>
             <div className="live-price-time">
-              Last updated: {chartData[0].time || 'Now'}
+              Last updated: {livePrice.time || 'Now'}
             </div>
             <div className="live-indicator">
               <span className="live-dot"></span>
@@ -231,14 +238,25 @@ const BitcoinChart = ({
           <span className="current-value">
             {chartData.length > 0 && `$${chartData[chartData.length - 1].price?.toFixed(2)}`}
           </span>
-          <div className={`data-source-indicator ${isLiveData ? 'live' : 'historic'} ${isSwitchingAPI ? 'switching' : ''}`}>
+          <div className={`data-source-indicator ${isLiveData ? 'live' : isStaleData ? 'stale' : 'historic'} ${isSwitchingAPI ? 'switching' : ''}`}>
             <span className="data-source-dot"></span>
             {isSwitchingAPI 
               ? 'Switching API...' 
-              : (isLiveData ? 'Live Data (Real-time)' : 'Historic Data (Polygon)')
+              : isStaleData 
+                ? 'Stale Data (Sample)'
+                : (isLiveData ? 'Live Data (Real-time)' : 'Historic Data (Polygon)')
             }
           </div>
         </div>
+
+        {error && chartData && chartData.length > 0 && (
+          <div className="error-banner">
+            <div className="error-banner-content">
+              <span className="error-icon">⚠️</span>
+              <span className="error-text">{error}</span>
+            </div>
+          </div>
+        )}
 
         <div className="toolbar">
           <div className="toolbar--left">
