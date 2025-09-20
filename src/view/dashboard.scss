@@ -1,90 +1,234 @@
 .dashboard-container {
-  header {
+  min-height: 100vh;
+  padding: 0;
+
+  .dashboard-header {
+    background: linear-gradient(135deg, #e61d02 0%, #ff6b35 100%);
+    border-radius: 0 0 20px 20px;
+    padding: 2rem;
     margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
 
-    h1 {
-      font-size: 4.5rem;
-      margin: 1.25rem 0;
-      span{
-        font-size: 2rem;
-        color: #BDBEBF;
-        font-weight: 600;
-        vertical-align: super;
-      }
-    }
-    p {
-      margin: 0;
-      font-size: 1.25rem;
-      
-      &.positive {
-        color: #67BF6B;
-      }
-      
-      &.negative {
-        color: #ff4d4f;
-      }
-    }
-  }
-
-  .tabs {
-    .ant-tabs .ant-tabs-nav-list{
-      
-      .ant-tabs-ink-bar.ant-tabs-ink-bar-animated{
-        background-color: #4B40EE;
-      }
-
-      .ant-tabs-tab{
-      font-size: 1.125rem;
-      font-weight: 400;
-
-      &:hover{
-        color: #4B40EE99;
-      }
-      &.ant-tabs-tab-active .ant-tabs-tab-btn{
-        color: #4B40EE;
-        
-      }
-  }
-    }
-      
-  }
-
-  // Bitcoin-specific styles
-  .summary-content {
     .bitcoin-header {
-      text-align: center;
-      margin-bottom: 2rem;
-      padding: 2rem;
-      background: linear-gradient(135deg, #4B40EE 0%, #6B5CE6 100%);
-      border-radius: 12px;
-      color: white;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
 
       .bitcoin-logo {
         display: flex;
         align-items: center;
-        justify-content: center;
         gap: 1rem;
-        margin-bottom: 0.5rem;
 
         .bitcoin-icon {
           font-size: 3rem;
+          color: #ffffff;
           font-weight: bold;
           text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-          animation: bitcoinGlow 2s ease-in-out infinite alternate;
         }
 
         h2 {
           font-size: 2.5rem;
-          font-weight: 700;
           margin: 0;
+          color: #ffffff;
+          font-weight: 700;
           text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
       }
 
       p {
-        font-size: 1.125rem;
-        opacity: 0.9;
         margin: 0;
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+      }
+    }
+
+    .price-info {
+      display: flex;
+      gap: 3rem;
+      align-items: center;
+
+      .current-price-display {
+        text-align: center;
+
+        h3 {
+          margin: 0 0 0.5rem 0;
+          font-size: 1rem;
+          color: rgba(255, 255, 255, 0.8);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .price-value {
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: #ffffff;
+          margin-bottom: 0.5rem;
+
+          .currency {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-left: 0.5rem;
+          }
+        }
+
+        .price-change {
+          font-size: 1rem;
+          font-weight: 600;
+          padding: 0.25rem 0.75rem;
+          border-radius: 20px;
+          
+          &.positive {
+            color: #67BF6B;
+            background: rgba(103, 191, 107, 0.1);
+          }
+          
+          &.negative {
+            color: #ff4d4f;
+            background: rgba(255, 77, 79, 0.1);
+          }
+        }
+
+        .live-indicator {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          margin-top: 0.5rem;
+          font-size: 0.9rem;
+          color: #67BF6B;
+          font-weight: 600;
+
+          .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #67BF6B;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+          }
+        }
+      }
+
+      .range-info {
+        text-align: center;
+
+        h4 {
+          margin: 0 0 0.5rem 0;
+          font-size: 1rem;
+          color: rgba(255, 255, 255, 0.8);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .range-display {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+
+          .current-range {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+          }
+
+          .data-source {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+
+  .tabs {
+    background: #ffffff;
+
+    .ant-tabs .ant-tabs-nav-list{
+      
+      .ant-tabs-ink-bar.ant-tabs-ink-bar-animated{
+        background: linear-gradient(135deg, #e61d02 0%, #ff6b35 100%);
+      }
+
+      .ant-tabs-tab{
+        font-size: 1.125rem;
+        font-weight: 400;
+        transition: all 0.3s ease;
+        color: #666;
+        padding: 0.5rem;
+        border-top-right-radius: 10px;
+        border-top-left-radius: 10px;
+        &:hover{
+          color: #ff6b35;
+          background: rgba(255, 107, 53, 0.25);
+        }
+        &.ant-tabs-tab-active .ant-tabs-tab-btn{
+          color: #ff6b35;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  // Bitcoin-specific styles
+  .summary-content {
+    padding: 2rem;
+    background: #ffffff;
+
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+
+      .stat-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid #e9ecef;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+          border-color: #ff6b35;
+        }
+
+        h4 {
+          margin: 0 0 0.5rem 0;
+          font-size: 0.9rem;
+          color: #666;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        p {
+          margin: 0;
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #333;
+          background: linear-gradient(135deg, #e61d02 0%, #ff6b35 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        // Special styling for price change card
+        &:nth-child(6) p {
+          font-size: 1.2rem;
+          font-weight: 600;
+        }
       }
     }
 
