@@ -1,0 +1,56 @@
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  transition: all 0.3s ease;
+  font-size: 16px;
+
+  &:hover {
+    background: rgba(255, 107, 53, 0.1);
+    color: #ff6b35;
+    transform: scale(1.1);
+  }
+
+  &:focus {
+    outline: none;
+    // box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.3);
+  }
+
+  .anticon {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover .anticon {
+    transform: rotate(180deg);
+  }
+}
+
+// Dark mode specific styles
+.dark .theme-toggle {
+  color: #000000;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #000000;
+  }
+
+}
+
+// Light mode specific styles
+.light .theme-toggle {
+  color: #333333;
+
+  &:hover {
+    background: rgba(255, 107, 53, 0.1);
+    color: #ff6b35;
+  }
+
+ 
+}

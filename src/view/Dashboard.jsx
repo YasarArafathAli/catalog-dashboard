@@ -5,16 +5,20 @@ import { Tabs, Button, Alert, Spin } from 'antd';
 import LineGraph from '../components/LineGraph/LineGraph';
 import BitcoinChart from '../components/BitcoinChart/BitcoinChart';
 import SkeletonPlaceHolder from '../components/Skeleton';
+import ThemeToggle from '../components/ThemeToggle/ThemeToggle';
 import { fetchHistoricData } from '../service/PolygonAPI';
 import { createFinnhubConnection } from '../service/FinnhubWebSocket';
 import { getPlaceholderData } from '../data/placeholderData';
 import { throttle } from '../utils/debounce';
+import { useTheme } from '../contexts/ThemeContext';
 
 const onChange = (key) => {
   console.log(key);
 };
 
 const Dashboard = () => {
+  const { isDarkMode } = useTheme();
+  
   // Bitcoin data state
   const [chartData, setChartData] = useState([]);
   const [selectedRange, setSelectedRange] = useState('1D');
@@ -333,8 +337,11 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="dashboard-container">
+    <div className={`dashboard-container ${isDarkMode ? 'dark' : 'light'}`}>
       <header className="dashboard-header">
+        <div className="header-top">
+          <ThemeToggle />
+        </div>
         <div className="bitcoin-header">
           <div className="bitcoin-logo">
             <div className="bitcoin-icon">₿</div>

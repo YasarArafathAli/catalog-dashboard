@@ -1,6 +1,20 @@
 .dashboard-container {
+
   min-height: 100vh;
-  padding: 0;
+  padding: 3rem 6rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  // Light theme (default)
+  &.light {
+    background: #f8f9fa;
+    color: #333333;
+  }
+
+  // Dark theme
+  &.dark {
+    background: #140000;
+    color: #ffffff;
+  }
 
   .dashboard-header {
     background: linear-gradient(135deg, #e61d02 0%, #ff6b35 100%);
@@ -13,6 +27,18 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 2rem;
+    position: relative;
+
+    .header-top {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+      background-color: #fff;
+      border-radius: 50px;
+      padding: 0 0.25rem;
+      // width: 100%;
+    }
 
     .bitcoin-header {
       display: flex;
@@ -189,7 +215,17 @@
   }
 
   .tabs {
-    background: #ffffff;
+    transition: background-color 0.3s ease;
+
+    // Light theme
+    .light & {
+      background: #ffffff;
+    }
+
+    // Dark theme
+    .dark & {
+      background: #000000;
+    }
 
     .ant-tabs .ant-tabs-nav-list{
       
@@ -201,10 +237,20 @@
         font-size: 1.125rem;
         font-weight: 400;
         transition: all 0.3s ease;
-        color: #666;
         padding: 0.5rem;
         border-top-right-radius: 10px;
         border-top-left-radius: 10px;
+
+        // Light theme
+        .light & {
+          color: #666;
+        }
+
+        // Dark theme
+        .dark & {
+          color: #cccccc;
+        }
+
         &:hover{
           color: #ff6b35;
           background: rgba(255, 107, 53, 0.25);
@@ -220,7 +266,17 @@
   // Bitcoin-specific styles
   .summary-content {
     padding: 2rem;
-    background: #ffffff;
+    transition: background-color 0.3s ease;
+
+    // Light theme
+    .light & {
+      background: #ffffff;
+    }
+
+    // Dark theme
+    .dark & {
+      background: #000000;
+    }
 
     .summary-stats {
       display: grid;
@@ -229,13 +285,23 @@
       margin-bottom: 2rem;
 
       .stat-card {
-        background: #f8f9fa;
         border-radius: 12px;
         padding: 1.5rem;
         text-align: center;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: 1px solid #e9ecef;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+
+        // Light theme
+        .light & {
+          background: #f8f9fa;
+          border: 1px solid #e9ecef;
+        }
+
+        // Dark theme
+        .dark & {
+          background: #1a1a1a;
+          border: 1px solid #333333;
+        }
 
         &:hover {
           transform: translateY(-2px);
@@ -246,17 +312,26 @@
         h4 {
           margin: 0 0 0.5rem 0;
           font-size: 0.9rem;
-          color: #666;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+          transition: color 0.3s ease;
+
+          // Light theme
+          .light & {
+            color: #666;
+          }
+
+          // Dark theme
+          .dark & {
+            color: #cccccc;
+          }
         }
 
         p {
           margin: 0;
           font-size: 1.5rem;
           font-weight: 700;
-          color: #333;
           background: linear-gradient(135deg, #e61d02 0%, #ff6b35 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -504,22 +579,44 @@
   }
 }
 
-.dashboard-footer {
-  background: #f8f9fa;
-  border-top: 1px solid #e9ecef;
-  padding: 1rem 2rem;
-  text-align: center;
-  margin-top: auto;
-  
-  p {
-    margin: 0;
-    color: #6c757d;
-    font-size: 0.875rem;
-    font-weight: 400;
+  .dashboard-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 1rem 2rem;
+    text-align: center;
+    margin-top: auto;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
     
-    strong {
-      color: #ff6b35;
-      font-weight: 600;
+    // Light theme
+    .light & {
+      background: #f8f9fa;
+      border-top-color: #e9ecef;
+    }
+
+    // Dark theme
+    .dark & {
+      background: #000000;
+      border-top-color: #333333;
+    }
+    
+    p {
+      margin: 0;
+      font-size: 0.875rem;
+      font-weight: 400;
+      transition: color 0.3s ease;
+
+      // Light theme
+      .light & {
+        color: #6c757d;
+      }
+
+      // Dark theme
+      .dark & {
+        color: #cccccc;
+      }
+      
+      strong {
+        color: #ff6b35;
+        font-weight: 600;
+      }
     }
   }
-}

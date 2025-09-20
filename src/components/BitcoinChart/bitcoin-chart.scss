@@ -1,13 +1,35 @@
 .bitcoin-chart {
+  transition: background-color 0.3s ease;
+
+  // Light theme
+  &.light {
+    background: white;
+  }
+
+  // Dark theme
+  &.dark {
+    background: #220000;
+  }
+
   .graph-container {
     position: relative;
     height: 500px;
-    background: #fff;
     border-radius: 8px;
     padding: 20px;
     padding-top: 140px; // Add space for header and toolbar
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin: 20px 0;
+    transition: background-color 0.3s ease;
+
+    // Light theme
+    .light & {
+      background: #fff;
+    }
+
+    // Dark theme
+    .dark & {
+      background: #000000;
+    }
 
     &--fullscreen {
       position: fixed;
@@ -66,10 +88,20 @@
         font-size: 24px;
         font-weight: bold;
         color: #ff6b35;
-        background: rgba(255, 255, 255, 0.9);
         padding: 8px 12px;
         border-radius: 6px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease;
+
+        // Light theme
+        .light & {
+          background: rgba(255, 255, 255, 0.9);
+        }
+
+        // Dark theme
+        .dark & {
+          background: rgba(0, 0, 0, 0.95);
+        }
       }
 
       .data-source-indicator {
@@ -81,6 +113,20 @@
         padding: 4px 8px;
         border-radius: 4px;
         transition: all 0.3s ease;
+
+        // Light theme
+        .light & {
+          color: #666;
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid #e0e0e0;
+        }
+
+        // Dark theme
+        .dark & {
+          color: #cccccc;
+          background: rgba(0, 0, 0, 0.95);
+          border: 1px solid #333333;
+        }
 
         &.live {
           color: #67BF6B;
@@ -274,8 +320,18 @@
       }
 
       p {
-        color: #666;
         margin: 0;
+        transition: color 0.3s ease;
+
+        // Light theme
+        .light & {
+          color: #666;
+        }
+
+        // Dark theme
+        .dark & {
+          color: #cccccc;
+        }
       }
     }
   }
@@ -288,18 +344,30 @@
     text-align: center;
 
     p {
-      color: #666;
       font-size: 16px;
+      transition: color 0.3s ease;
+
+      // Light theme
+      .light & {
+        color: #666;
+      }
+
+      // Dark theme
+      .dark & {
+        color: #cccccc;
+      }
     }
   }
 }
 
 .custom-tooltip {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.98);
   color: white;
   padding: 8px 12px;
   border-radius: 4px;
   font-size: 12px;
+  border: 1px solid #444444;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
 
   .tooltip-time {
     margin: 0 0 4px 0;
@@ -324,5 +392,31 @@
 .recharts-cartesian-axis-tick-value {
   font-size: 12px;
   fill: #666;
+}
+
+// Dark theme - sharper chart elements
+.bitcoin-chart.dark {
+  .recharts-cartesian-grid-horizontal line,
+  .recharts-cartesian-grid-vertical line {
+    stroke: #444444;
+    stroke-opacity: 0.9;
+  }
+
+  .recharts-xAxis .recharts-text,
+  .recharts-yAxis .recharts-text {
+    fill: #ffffff;
+  }
+
+  .recharts-cartesian-axis-tick-value {
+    fill: #ffffff;
+  }
+
+  .recharts-tooltip-wrapper {
+    .recharts-tooltip-content {
+      background: rgba(0, 0, 0, 0.98) !important;
+      border: 1px solid #444444 !important;
+      border-radius: 6px !important;
+    }
+  }
 }
 

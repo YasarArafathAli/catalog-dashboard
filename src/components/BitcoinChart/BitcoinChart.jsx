@@ -13,6 +13,7 @@ import {
   ExpandAltOutlined,
   ShrinkOutlined,
 } from '@ant-design/icons';
+import { useTheme } from '../../contexts/ThemeContext';
 import './bitcoin-chart.scss';
 
 /**
@@ -35,6 +36,7 @@ const BitcoinChart = ({
   isLiveConnected = false,
   isStaleData = false
 }) => {
+  const { isDarkMode } = useTheme();
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
@@ -142,7 +144,7 @@ const BitcoinChart = ({
   };
 
   return (
-    <div className="bitcoin-chart" style={{ textAlign: 'center' }}>
+    <div className={`bitcoin-chart ${isDarkMode ? 'dark' : 'light'}`} style={{ textAlign: 'center' }}>
       <div
         className={`graph-container ${
           isFullscreen ? 'graph-container--fullscreen' : ''
