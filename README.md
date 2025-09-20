@@ -2,6 +2,8 @@
 
 A high-performance real-time Bitcoin price tracking dashboard showcasing advanced React patterns, WebSocket optimization, and hybrid data architecture.
 
+**[Live Demo](https://live-bitcoin-dashboard.vercel.app/)** | **[GitHub Repository](#)**
+
 ## **Key Features**
 
 ### **Real-Time Data Management**
@@ -75,6 +77,10 @@ A high-performance real-time Bitcoin price tracking dashboard showcasing advance
 - **Connection Management**: Automatic reconnection with exponential backoff
 
 ## **Quick Start**
+
+**[Try the Live Demo](https://live-bitcoin-dashboard.vercel.app/)** to see the dashboard in action!
+
+### **Local Development**
 
 ```bash
 # Clone and install
