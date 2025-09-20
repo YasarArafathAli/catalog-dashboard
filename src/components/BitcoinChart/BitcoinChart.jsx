@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import {
   LineChart,
   Line,
@@ -49,7 +49,7 @@ const BitcoinChart = ({
   const memoizedChartData = useMemo(() => {
     console.log('Chart data memoized:', chartData.length, 'points');
     return chartData;
-  }, [chartData]);
+  }, [chartData.length, chartData[chartData.length - 1]?.price]);
 
 
   // Handle escape key for fullscreen
@@ -297,4 +297,5 @@ const BitcoinChart = ({
   );
 };
 
-export default BitcoinChart;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(BitcoinChart);

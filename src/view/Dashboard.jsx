@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import './dashboard.scss';
 
 import { Tabs, Button, Alert, Spin } from 'antd';
@@ -8,6 +8,7 @@ import SkeletonPlaceHolder from '../components/Skeleton';
 import { fetchHistoricData } from '../service/PolygonAPI';
 import { createFinnhubConnection } from '../service/FinnhubWebSocket';
 import { getPlaceholderData } from '../data/placeholderData';
+import { throttle } from '../utils/debounce';
 
 const onChange = (key) => {
   console.log(key);
@@ -24,10 +25,8 @@ const Dashboard = () => {
   const [isLiveConnected, setIsLiveConnected] = useState(false);
   const [hasReceivedLiveData, setHasReceivedLiveData] = useState(false);
   const [storedLivePrice, setStoredLivePrice] = useState(null); // Store the last successful live price
-  
   const wsConnectionRef = useRef(null);
-  const retryCountRef = useRef(0);
-  const maxRetries = 3;
+  const lastPriceRef = useRef(null); // Track last price to prevent unnecessary updates
 
   // Load initial historic data on mount and start live updates
   useEffect(() => {
@@ -47,6 +46,7 @@ const Dashboard = () => {
       if (wsConnectionRef.current) {
         wsConnectionRef.current.unsubscribe();
         wsConnectionRef.current.close();
+        wsConnectionRef.current = null;
       }
     };
   }, []);
@@ -56,12 +56,8 @@ const Dashboard = () => {
     setSelectedRange(range);
     setError(null);
     
-    // Close existing WebSocket connection
-    if (wsConnectionRef.current) {
-      wsConnectionRef.current.unsubscribe();
-      wsConnectionRef.current.close();
-      wsConnectionRef.current = null;
-    }
+    // Don't close WebSocket connection for range changes
+    // Keep live data flowing while showing historic chart data
     
     // Always use historic data for range changes - no loading state
     await fetchHistoricDataForRange(range);
@@ -70,63 +66,74 @@ const Dashboard = () => {
 
   // Start live data stream
   const startLiveData = () => {
+    // Prevent multiple simultaneous connections
+    if (wsConnectionRef.current && wsConnectionRef.current.isConnecting()) {
+      console.log('WebSocket connection already in progress, skipping');
+      return;
+    }
+
     setError(null);
     setIsLiveConnected(false);
     setLivePrice(null); // Clear any previous live price
-    setHasReceivedLiveData(false); // Reset live data flag
     
     const onMessage = (priceData) => {
+      // Only update if price has actually changed significantly
+      if (lastPriceRef.current !== null) {
+        const priceDifference = Math.abs(priceData.price - lastPriceRef.current);
+        const priceChangePercent = (priceDifference / lastPriceRef.current) * 100;
+        
+        // Skip update if price change is less than 0.01% (noise threshold)
+        if (priceChangePercent < 0.01) {
+          return;
+        }
+      }
+      
       console.log('Live data received:', priceData);
       setError(null);
-      retryCountRef.current = 0; // Reset retry count on successful connection
       setIsLiveConnected(true);
       setHasReceivedLiveData(true); // Mark that we've received live data
+      
+      // Update last price to track changes
+      lastPriceRef.current = priceData.price;
+      
       // Set live price for display, don't modify chart data
       setLivePrice(priceData);
       // Store the live price so we can keep showing it even if WebSocket disconnects
       setStoredLivePrice(priceData);
     };
+
+    // Throttle the onMessage handler to prevent excessive updates
+    const throttledOnMessage = throttle(onMessage, 100); // Max 10 updates per second
     
     const onError = (error) => {
       console.error('WebSocket error:', error);
       setIsLiveConnected(false);
-      
-      // Check if we should retry
-      if (retryCountRef.current < maxRetries) {
-        retryCountRef.current++;
-        console.log(`WebSocket connection failed, retrying... (${retryCountRef.current}/${maxRetries})`);
-        
-        // Retry after a delay
-        setTimeout(() => {
-          startLiveData();
-        }, 2000 * retryCountRef.current); // Exponential backoff
-      } else {
-        console.log('Max retries reached, keeping stored live price if available');
-        // Don't clear live data - keep showing the stored live price
-        setLivePrice(null); // Clear current live price but keep storedLivePrice
-        // Don't clear hasReceivedLiveData - we want to keep showing stored price
-        // Don't show error to user, just continue with stored live data
-      }
+      // Don't clear hasReceivedLiveData - we want to keep showing stored price
+      // The ConnectionManager handles retries automatically
+    };
+
+    const onConnect = () => {
+      console.log('WebSocket connected successfully');
+      setIsLiveConnected(true);
+      setError(null);
+    };
+
+    const onDisconnect = (event) => {
+      console.log('WebSocket disconnected:', event.code, event.reason);
+      setIsLiveConnected(false);
+      // Keep stored live data, don't clear hasReceivedLiveData
     };
     
     try {
-      wsConnectionRef.current = createFinnhubConnection(onMessage, onError);
+      wsConnectionRef.current = createFinnhubConnection(throttledOnMessage, onError, onConnect, onDisconnect);
       
-      // Add a timeout to detect if WebSocket never connects
-      const connectionTimeout = setTimeout(() => {
-        if (wsConnectionRef.current && wsConnectionRef.current.ws.readyState !== WebSocket.OPEN) {
-          console.log('WebSocket connection timeout, falling back to historic data');
-          onError(new Error('Connection timeout'));
-        }
-      }, 10000); // 10 second timeout
-      
-      // Clear timeout if connection succeeds
-      if (wsConnectionRef.current && wsConnectionRef.current.ws.readyState === WebSocket.OPEN) {
-        clearTimeout(connectionTimeout);
+      if (!wsConnectionRef.current) {
+        console.error('Failed to create WebSocket connection');
+        setError('Failed to create WebSocket connection');
       }
     } catch (error) {
       console.error('Failed to create WebSocket connection:', error);
-      onError(error);
+      setError('Failed to create WebSocket connection');
     }
   };
 
@@ -189,32 +196,26 @@ const Dashboard = () => {
   };
 
 
-  const getCurrentPrice = () => {
-    console.log('getCurrentPrice called - hasReceivedLiveData:', hasReceivedLiveData, 'livePrice:', livePrice, 'storedLivePrice:', storedLivePrice);
-    
+  const getCurrentPrice = useCallback(() => {
     // First priority: Current live price if WebSocket is connected
     if (isLiveConnected && livePrice && livePrice.price) {
-      console.log('Using current live price:', livePrice.price);
       return livePrice.price;
     }
     
     // Second priority: Stored live price if we've ever received live data
     if (hasReceivedLiveData && storedLivePrice && storedLivePrice.price) {
-      console.log('Using stored live price:', storedLivePrice.price);
       return storedLivePrice.price;
     }
     
     // Only fallback to historic data if we never received live data
     if (chartData.length === 0) {
-      console.log('No chart data available');
       return null;
     }
     
-    console.log('Using historic price:', chartData[chartData.length - 1].price);
     return chartData[chartData.length - 1].price;
-  };
+  }, [isLiveConnected, livePrice, hasReceivedLiveData, storedLivePrice, chartData]);
 
-  const getPriceChange = () => {
+  const getPriceChange = useCallback(() => {
     // Use live price if available, otherwise use historic data
     const current = getCurrentPrice();
     if (!current || chartData.length < 2) return null;
@@ -223,10 +224,10 @@ const Dashboard = () => {
     const change = current - previous;
     const changePercent = (change / previous) * 100;
     return { change, changePercent };
-  };
+  }, [getCurrentPrice, chartData]);
 
-  const currentPrice = getCurrentPrice();
-  const priceChange = getPriceChange();
+  const currentPrice = useMemo(() => getCurrentPrice(), [getCurrentPrice]);
+  const priceChange = useMemo(() => getPriceChange(), [getPriceChange]);
 
   // Create dynamic items for tabs
   const items = [
@@ -362,7 +363,7 @@ const Dashboard = () => {
                 </div>
                 <div className="indicator-time">
                   <span className="time-value">
-                    {(() => {
+                    {useMemo(() => {
                       // Get the time to display
                       let timeToShow;
                       
@@ -395,7 +396,7 @@ const Dashboard = () => {
                         minute: '2-digit',
                         second: '2-digit'
                       });
-                    })()}
+                    }, [isLiveConnected, livePrice, hasReceivedLiveData, storedLivePrice])}
                   </span>
                 </div>
               </div>
