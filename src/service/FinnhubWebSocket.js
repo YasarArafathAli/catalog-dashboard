@@ -24,35 +24,3 @@ export const createFinnhubConnection = (onMessage, onError, onConnect, onDisconn
   );
 };
 
-/**
- * Test WebSocket connection
- */
-export const testFinnhubConnection = () => {
-  return new Promise((resolve, reject) => {
-    const apiKey = import.meta.env.VITE_FINNHUB_API_KEY;
-    
-    if (!apiKey || apiKey === 'your_finnhub_api_key_here') {
-      reject(new Error('Finnhub API key not configured'));
-      return;
-    }
-
-    const wsUrl = `${FINNHUB_WS_URL}?token=${apiKey}`;
-    const ws = new WebSocket(wsUrl);
-    
-    const timeout = setTimeout(() => {
-      ws.close();
-      reject(new Error('Connection timeout'));
-    }, 5000);
-
-    ws.onopen = () => {
-      clearTimeout(timeout);
-      ws.close();
-      resolve('Connection successful');
-    };
-
-    ws.onerror = (error) => {
-      clearTimeout(timeout);
-      reject(new Error(`Connection failed: ${error.type}`));
-    };
-  });
-};

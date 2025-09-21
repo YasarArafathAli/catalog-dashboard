@@ -12,12 +12,17 @@
 
   // Dark theme
   &.dark {
-    background: #140000;
+    background: #000000b0;
     color: #ffffff;
   }
 
   .dashboard-header {
     background: linear-gradient(135deg, #e61d02 0%, #ff6b35 100%);
+    // background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    // background: linear-gradient(135deg, #1E1E1E, #2C2C2C);
+    // background: linear-gradient(135deg, #1A2980, #26D0CE);
+    // background: linear-gradient(135deg, #41295a, #2F0743);
+    color: #E0D7FF;
     border-radius: 0 0 20px 20px;
     padding: 2rem;
     margin-bottom: 2rem;
@@ -116,8 +121,7 @@
           }
           
           &.negative {
-            color: #ff4d4f;
-            background: rgba(255, 77, 79, 0.1);
+            color: #000;
           }
         }
 

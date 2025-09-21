@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import './dashboard.scss';
 
 import { Tabs, Button, Alert, Spin } from 'antd';
-import LineGraph from '../components/LineGraph/LineGraph';
 import BitcoinChart from '../components/BitcoinChart/BitcoinChart';
-import SkeletonPlaceHolder from '../components/Skeleton';
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle';
 import { fetchHistoricData } from '../service/PolygonAPI';
 import { createFinnhubConnection } from '../service/FinnhubWebSocket';
@@ -309,12 +307,11 @@ const Dashboard = () => {
                       size="small" 
                       type="primary" 
                       onClick={() => {
-                        retryCountRef.current = 0;
                         setError(null);
                         if (error.includes('retrying')) {
                           startLiveData();
                         } else {
-                          fetchHistoricDataForRange(selectedRange, true); // Show switching state
+                          fetchHistoricDataForRange(selectedRange); // Show switching state
                         }
                       }}
                       style={{ marginTop: 8 }}
