@@ -1,3 +1,5 @@
+@import '../../styles/colors.scss';
+
 .theme-toggle {
   display: flex;
   align-items: center;
@@ -12,14 +14,14 @@
   font-size: 16px;
 
   &:hover {
-    background: rgba(255, 107, 53, 0.1);
-    color: #ff6b35;
+    background: $hover-bg;
+    color: $primary-orange;
     transform: scale(1.1);
   }
 
   &:focus {
     outline: none;
-    // box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.3);
+    // box-shadow: 0 0 0 2px $focus-ring;
   }
 
   .anticon {
@@ -34,22 +36,22 @@
 
 // Dark mode specific styles
 .dark .theme-toggle {
-  color: #000000;
+  color: $black;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #000000;
+    background: $hover-bg-dark;
+    color: $black;
   }
 
 }
 
 // Light mode specific styles
 .light .theme-toggle {
-  color: #333333;
+  color: $light-text;
 
   &:hover {
-    background: rgba(255, 107, 53, 0.1);
-    color: #ff6b35;
+    background: $hover-bg;
+    color: $primary-orange;
   }
 
  

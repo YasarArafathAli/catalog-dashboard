@@ -1,0 +1,128 @@
+/**
+ * Color Variables for Bitcoin Dashboard
+ * Centralized color management for consistent theming
+ */
+
+// ===== PRIMARY COLORS =====
+$primary-orange: #ff6b35;
+$primary-orange-dark: #e55a2b;
+$primary-red: #e61d02;
+$primary-gradient: linear-gradient(135deg, #e61d02 0%, #ff6b35 100%);
+
+// ===== SECONDARY COLORS =====
+$secondary-purple: #4B40EE;
+$secondary-blue: #0f2027;
+$secondary-blue-dark: #203a43;
+$secondary-blue-darker: #2c5364;
+
+// ===== SUCCESS/ERROR COLORS =====
+$success-green: #67BF6B;
+$success-green-light: rgba(103, 191, 107, 0.1);
+$error-red: #ff4d4f;
+$error-red-light: #ff7875;
+$error-red-bg: rgba(255, 107, 107, 0.1);
+$error-red-border: rgba(255, 107, 107, 0.3);
+
+// ===== WARNING COLORS =====
+$warning-orange: #FFA500;
+$warning-orange-bg: rgba(255, 165, 0, 0.1);
+$warning-yellow: #FF6B6B;
+$warning-yellow-bg: rgba(255, 107, 107, 0.1);
+
+// ===== NEUTRAL COLORS =====
+$white: #ffffff;
+$black: #000000;
+$gray-100: #f8f9fa;
+$gray-200: #e9ecef;
+$gray-300: #e0e0e0;
+$gray-400: #cccccc;
+$gray-500: #666666;
+$gray-600: #6c757d;
+$gray-700: #333333;
+$gray-800: #1a1a1a;
+$gray-900: #220000;
+
+// ===== THEME-SPECIFIC COLORS =====
+// Light Theme
+$light-bg: #f8f9fa;
+$light-bg-secondary: #ffffff;
+$light-text: #333333;
+$light-text-secondary: #666666;
+$light-text-muted: #6c757d;
+$light-border: #e9ecef;
+$light-shadow: rgba(0, 0, 0, 0.1);
+$light-shadow-hover: rgba(0, 0, 0, 0.15);
+
+// Dark Theme
+$dark-bg: #000000;
+$dark-bg-secondary: #4e4343;
+$dark-bg-tertiary: #856060;
+$dark-bg-chart: #423d3d;
+$dark-text: #ffffff;
+$dark-text-secondary: #cccccc;
+$dark-text-muted: #cccccc;
+$dark-border: #333333;
+$dark-shadow: rgba(0, 0, 0, 0.2);
+$dark-shadow-hover: rgba(0, 0, 0, 0.3);
+
+// ===== CHART COLORS =====
+$chart-grid: #444444;
+$chart-text: #666666;
+$chart-tooltip-bg: rgba(0, 0, 0, 0.98);
+$chart-tooltip-border: #444444;
+$chart-tooltip-text: #f7931a;
+
+// ===== STATUS COLORS =====
+$status-live: $success-green;
+$status-live-bg: $success-green-light;
+$status-historic: $primary-orange;
+$status-historic-bg: rgba(75, 64, 238, 0.1);
+$status-switching: $warning-orange;
+$status-switching-bg: $warning-orange-bg;
+$status-stale: $warning-yellow;
+$status-stale-bg: $warning-yellow-bg;
+
+// ===== INTERACTIVE COLORS =====
+$hover-bg: rgba(255, 107, 53, 0.1);
+$hover-bg-dark: rgba(255, 255, 255, 0.1);
+$hover-border: $primary-orange;
+$focus-ring: rgba(255, 107, 53, 0.3);
+
+// ===== GRADIENT VARIATIONS =====
+$gradient-primary: $primary-gradient;
+$gradient-text: $primary-gradient;
+$gradient-backdrop: rgba(255, 255, 255, 0.95);
+
+// ===== OPACITY VARIATIONS =====
+$opacity-10: 0.1;
+$opacity-20: 0.2;
+$opacity-25: 0.25;
+$opacity-30: 0.3;
+$opacity-50: 0.5;
+$opacity-80: 0.8;
+$opacity-90: 0.9;
+$opacity-95: 0.95;
+$opacity-98: 0.98;
+
+// ===== TEXT SHADOWS =====
+$text-shadow-light: 2px 2px 4px rgba(0, 0, 0, 0.3);
+$text-shadow-glow: 0 0 10px rgba(255, 255, 255, 0.3);
+$text-shadow-glow-strong: 0 0 20px rgba(255, 255, 255, 0.6);
+
+// ===== BOX SHADOWS =====
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+$shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.2);
+$shadow-2xl: 0 4px 20px rgba(0, 0, 0, 0.1);
+$shadow-tooltip: 0 4px 12px rgba(0, 0, 0, 0.8);
+
+// ===== ANIMATION COLORS =====
+$pulse-color: $white;
+$glow-color: rgba(255, 255, 255, 0.3);
+$glow-color-strong: rgba(255, 255, 255, 0.6);
+
+// ===== LEGACY COLORS (for backward compatibility) =====
+$bitcoin-orange: $primary-orange;
+$bitcoin-red: $primary-red;
+$bitcoin-gradient: $primary-gradient;

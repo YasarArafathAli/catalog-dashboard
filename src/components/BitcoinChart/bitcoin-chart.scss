@@ -1,14 +1,16 @@
+@import '../../styles/colors.scss';
+
 .bitcoin-chart {
   transition: background-color 0.3s ease;
 
   // Light theme
   &.light {
-    background: white;
+    background: $white;
   }
 
   // Dark theme
   &.dark {
-    background: #220000;
+    background: $dark-bg;
   }
 
   .graph-container {
@@ -23,12 +25,12 @@
 
     // Light theme
     .light & {
-      background: #fff;
+      background: $white;
     }
 
     // Dark theme
     .dark & {
-      background: #000000;
+      background: $dark-bg;
     }
 
     &--fullscreen {
@@ -38,7 +40,7 @@
       width: 100vw;
       height: 100vh;
       z-index: 9999;
-      background: #fff;
+      background: $white;
       border-radius: 0;
       margin: 0;
       padding: 20px;
@@ -53,7 +55,7 @@
         right: 20px;
         margin-bottom: 60px;
         padding: 15px 20px;
-        background: rgba(255, 255, 255, 0.95);
+        background: $white;
         backdrop-filter: blur(10px);
         border-radius: 8px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -64,7 +66,8 @@
         top: 80px;
         left: 20px;
         right: 20px;
-        background: rgba(255, 255, 255, 0.95);
+        // background: rgba(255, 255, 255, 0.95);
+        background: $white;
         backdrop-filter: blur(10px);
         border-radius: 8px;
         padding: 15px 20px;
@@ -87,7 +90,7 @@
       .current-value {
         font-size: 24px;
         font-weight: bold;
-        color: #ff6b35;
+        color: $primary-orange;
         padding: 8px 12px;
         border-radius: 6px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -95,12 +98,12 @@
 
         // Light theme
         .light & {
-          background: rgba(255, 255, 255, 0.9);
+          background: $white;
         }
 
         // Dark theme
         .dark & {
-          background: rgba(0, 0, 0, 0.95);
+          background: $dark-bg;
         }
       }
 
@@ -116,54 +119,54 @@
 
         // Light theme
         .light & {
-          color: #666;
-          background: rgba(255, 255, 255, 0.8);
-          border: 1px solid #e0e0e0;
+          color: $gray-500;
+          background: $white;
+          border: 1px solid $gray-300;
         }
 
         // Dark theme
         .dark & {
-          color: #cccccc;
-          background: rgba(0, 0, 0, 0.95);
-          border: 1px solid #333333;
+          color: $gray-400;
+          background: $dark-bg;
+          border: 1px solid $gray-700;
         }
 
         &.live {
-          color: #67BF6B;
-          background: rgba(103, 191, 107, 0.1);
+          color: $success-green;
+          background: $success-green-light;
 
           .data-source-dot {
-            background: #67BF6B;
+            background: $success-green;
             animation: pulse 2s infinite;
           }
         }
 
         &.historic {
-          color: #ff6b35;
-          background: rgba(75, 64, 238, 0.1);
+          color: $primary-orange;
+          background: $warning-orange-bg;
 
           .data-source-dot {
-            background: #ff6b35;
+            background: $primary-orange;
             animation: none;
           }
         }
 
         &.switching {
-          color: #FFA500;
-          background: rgba(255, 165, 0, 0.1);
+          color: $warning-orange;
+          background: $warning-orange-bg;
 
           .data-source-dot {
-            background: #FFA500;
+            background: $warning-orange;
             animation: pulse 1s infinite;
           }
         }
 
         &.stale {
-          color: #FF6B6B;
-          background: rgba(255, 107, 107, 0.1);
+          color: $warning-yellow;
+          background: $warning-yellow-bg;
 
           .data-source-dot {
-            background: #FF6B6B;
+            background: $warning-yellow;
             animation: none;
           }
         }
@@ -177,7 +180,7 @@
     }
 
     .error-banner {
-      background: rgba(255, 107, 107, 0.1);
+      background: $error-red-light;
       border: 1px solid rgba(255, 107, 107, 0.3);
       border-radius: 6px;
       margin: 8px 0;
@@ -188,7 +191,7 @@
         align-items: center;
         gap: 8px;
         font-size: 12px;
-        color: #FF6B6B;
+        color: $warning-yellow;
 
         .error-icon {
           font-size: 14px;
@@ -211,7 +214,7 @@
       align-items: center;
       margin-bottom: 20px;
       padding: 10px 0;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid $gray-200;
       background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(10px);
       border-radius: 6px;
@@ -226,20 +229,20 @@
           display: flex;
           align-items: center;
           gap: 5px;
-          color: #666;
+          color: $gray-500;
           padding: 6px 12px;
           border-radius: 4px;
           
           &:hover {
-            color: #ff6b35;
+            color: $primary-orange;
             background: rgba(75, 64, 238, 0.1);
           }
 
           &.close-fullscreen {
-            color: #ff4d4f;
+            color: $error-red;
             
             &:hover {
-              color: #ff7875;
+              color: $error-red-light;
               background: rgba(255, 77, 79, 0.1);
             }
           }
@@ -260,20 +263,20 @@
           padding: 6px 12px;
 
           &.ant-btn-primary {
-            background: #ff6b35;
-            border-color: #ff6b35;
+            background: $primary-orange;
+            border-color: $primary-orange;
 
             &:hover {
-              background: #e55a2b;
-              border-color: #e55a2b;
+              background: $primary-orange-dark;
+              border-color: $primary-orange-dark;
             }
           }
 
           &.ant-btn-link {
-            color: #666;
+            color: $gray-500;
 
             &:hover {
-              color: #ff6b35;
+              color: $primary-orange;
               background: rgba(75, 64, 238, 0.1);
             }
           }
@@ -292,7 +295,7 @@
 
     p {
       margin-top: 16px;
-      color: #666;
+      color: $gray-500;
       font-size: 14px;
       font-weight: 500;
     }
@@ -300,7 +303,7 @@
     .ant-spin {
       .ant-spin-dot {
         i {
-          background-color: #ff6b35;
+          background-color: $primary-orange;
         }
       }
     }
@@ -315,7 +318,7 @@
 
     .error-message {
       h3 {
-        color: #ff4d4f;
+        color: $error-red;
         margin-bottom: 8px;
       }
 
@@ -325,12 +328,12 @@
 
         // Light theme
         .light & {
-          color: #666;
+          color: $gray-500;
         }
 
         // Dark theme
         .dark & {
-          color: #cccccc;
+          color: $gray-400;
         }
       }
     }
@@ -349,12 +352,12 @@
 
       // Light theme
       .light & {
-        color: #666;
+        color: $gray-500;
       }
 
       // Dark theme
       .dark & {
-        color: #cccccc;
+        color: $gray-400;
       }
     }
   }
@@ -366,7 +369,7 @@
   padding: 8px 12px;
   border-radius: 4px;
   font-size: 12px;
-  border: 1px solid #444444;
+  border: 1px solid $chart-grid;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
 
   .tooltip-time {
@@ -376,7 +379,7 @@
 
   .tooltip-price {
     margin: 0;
-    color: #f7931a;
+    color: $chart-tooltip-text;
     font-weight: bold;
   }
 }
@@ -385,36 +388,36 @@
 .recharts-yAxis {
   .recharts-text {
     font-size: 12px;
-    fill: #666;
+    fill: $gray-500;
   }
 }
 
 .recharts-cartesian-axis-tick-value {
   font-size: 12px;
-  fill: #666;
+  fill: $gray-500;
 }
 
 // Dark theme - sharper chart elements
 .bitcoin-chart.dark {
   .recharts-cartesian-grid-horizontal line,
   .recharts-cartesian-grid-vertical line {
-    stroke: #444444;
+    stroke: $chart-grid;
     stroke-opacity: 0.9;
   }
 
   .recharts-xAxis .recharts-text,
   .recharts-yAxis .recharts-text {
-    fill: #ffffff;
+    fill: $white;
   }
 
   .recharts-cartesian-axis-tick-value {
-    fill: #ffffff;
+    fill: $white;
   }
 
   .recharts-tooltip-wrapper {
     .recharts-tooltip-content {
       background: rgba(0, 0, 0, 0.98) !important;
-      border: 1px solid #444444 !important;
+      border: 1px solid $chart-grid !important;
       border-radius: 6px !important;
     }
   }
